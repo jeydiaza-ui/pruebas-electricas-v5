@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="app-version" content="5.0.6">
+  <meta name="app-version" content="5.0.7">
   <meta name="description" content="Pruebas de transformadores: índice horario, TTR, aislamiento, resistencia de devanados e informe con fotos.">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png" sizes="192x192">
@@ -206,7 +206,7 @@ iframe{display:block;width:100%;border:0;background:transparent}
       <button type="button" data-modo="manual" aria-pressed="true">Manual</button>
       <button type="button" data-modo="auto" aria-pressed="false">Automático (fotos guiadas)</button>
     </div>
-    <div id="ver">v5.0.6 · 2026-11-04</div>
+    <div id="ver">v5.0.7 · 2026-11-04</div>
   </div>
   <div id="view">
     <div id="frames">
@@ -240,6 +240,7 @@ iframe{display:block;width:100%;border:0;background:transparent}
           <div class="fs">
             <h3>Datos del cliente</h3>
             <div class="g2">
+              <div class="full"><label for="cli_pick">Cliente guardado (reutilizar)</label><select id="cli_pick"><option value="">— Nuevo cliente —</option></select><div class="kv" style="font-size:12px;color:var(--tm);margin-top:4px">Elige un cliente anterior para llenar sus datos; el equipo se llena aparte.</div></div>
               <div class="full"><label for="ri_cli">Nombre del cliente</label><input id="ri_cli" type="text"></div>
               <div class="full"><label for="ri_dir">Dirección</label><input id="ri_dir" type="text"></div>
               <div><label for="ri_nit">NIT / Cédula</label><input id="ri_nit" type="text"></div>
@@ -311,7 +312,7 @@ var TRS={
 };
 var tipo="3",sel=["H","T"],repMode=false,frames={},panes={};
 var MODO="manual";try{if(LS.getItem("unif_modo")==="auto")MODO="auto";}catch(e){}
-var APP_VERSION={v:"5.0.6",fecha:"2026-11-04"};
+var APP_VERSION={v:"5.0.7",fecha:"2026-11-04"};
 function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 var EMP={nom:"",nit:"",dir:"",tel:"",logo:""};
 function $(id){return document.getElementById(id);}
@@ -726,6 +727,30 @@ function doSave(id,numero){
     askPersist();listSaved();
   }).catch(function(){msgSave("No se pudo guardar. Revisa el espacio disponible del navegador.");});
 }
+function refreshClientes(){
+  var sel=$("cli_pick");if(!sel)return;
+  var prev=sel.value;
+  idbDo("readonly",function(s){return s.getAll();}).then(function(all){
+    var map={};
+    (all||[]).slice().sort(function(a,b){return (a.fecha||"")<(b.fecha||"")?-1:1;}).forEach(function(r){
+      var f={};try{f=JSON.parse((r.ls&&r.ls.unif_info3)||"null")||{};}catch(e){}
+      var nom=String(f.ri_cli||r.cliente||"").trim();if(!nom)return;
+      var nit=String(f.ri_nit||"").trim();
+      var key=nom.toLowerCase()+"|"+nit.toLowerCase();
+      map[key]={nom:nom,nit:nit,dir:f.ri_dir||"",tel:f.ri_tel||"",resp:f.ri_resp||""};
+    });
+    window.__CLIENTES=map;
+    var keys=Object.keys(map).sort(function(a,b){return map[a].nom.localeCompare(map[b].nom);});
+    sel.innerHTML='<option value="">— Nuevo cliente —</option>'+keys.map(function(k){var c=map[k];return '<option value="'+encodeURIComponent(k)+'">'+esc(c.nom)+(c.nit?" · "+esc(c.nit):"")+'</option>';}).join("");
+    var prevKey=prev?decodeURIComponent(prev):"";
+    if(prevKey&&map[prevKey])sel.value=prev;
+    else{
+      var cur=(inf("ri_cli")||"").toLowerCase();
+      var found=keys.filter(function(k){return map[k].nom.toLowerCase()===cur;})[0];
+      if(found)sel.value=encodeURIComponent(found);
+    }
+  }).catch(function(){});
+}
 function listSaved(){
   idbDo("readonly",function(s){return s.getAll();}).then(function(all){
     var box=$("savedList");
@@ -735,6 +760,7 @@ function listSaved(){
       return '<div class="kv" style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--border)"><span><b>'+esc(r.numero)+'</b> · '+esc(r.cliente||"sin nombre de cliente")+'<br><small>'+esc(r.tipo)+' · '+esc(new Date(r.fecha).toLocaleString("es"))+'</small></span><span style="display:flex;flex-direction:column;gap:6px"><button type="button" class="act" data-open="'+esc(r.id)+'">Abrir</button> <button type="button" class="act" data-exp="'+esc(r.id)+'">Exportar</button> <button type="button" class="act" data-del="'+esc(r.id)+'">Borrar</button></span></div>';
     }).join("");
     updateStorage();
+    refreshClientes();
   }).catch(function(){$("savedList").innerHTML='<div class="kv">No se pudo leer la lista de informes.</div>';});
 }
 function openSaved(id){
@@ -821,6 +847,13 @@ function delSaved(id){
   }).catch(function(){msgSave("No se pudo borrar.");});
 }
 $("r_save").addEventListener("click",saveReport);
+$("cli_pick").addEventListener("change",function(){
+  var key=this.value?decodeURIComponent(this.value):"";
+  var c=window.__CLIENTES&&window.__CLIENTES[key];
+  if(!c)return;
+  function set(id,v){var e=$(id);if(!e)return;e.value=v||"";e.dispatchEvent(new Event("input",{bubbles:true}));}
+  set("ri_cli",c.nom);set("ri_dir",c.dir);set("ri_nit",c.nit);set("ri_tel",c.tel);set("ri_resp",c.resp);
+});
 $("exp_all").addEventListener("click",exportAll);
 $("imp_btn").addEventListener("click",function(){$("imp_file").click();});
 $("imp_file").addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];if(f)importFile(f);e.target.value="";});

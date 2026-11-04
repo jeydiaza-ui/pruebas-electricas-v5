@@ -1,5 +1,11 @@
 # Cambios
 
+## v5.0.7 — 2026-11-04
+
+- **Reutilizar cliente en un informe nuevo:** en “Datos del cliente” hay un selector **Cliente guardado** con los clientes de los informes ya guardados. Al elegirlo se llenan nombre, dirección, NIT, teléfono y responsable; el equipo se llena aparte para el nuevo transformador.
+- Los clientes se toman de los informes guardados (si un cliente tiene varios, usa los datos del más reciente).
+- Caché `transformadores-pwa-v5.0.7-2026-11-04` y versión visible 5.0.7.
+
 ## v5.0.6 — 2026-11-04
 
 - **Fotos del informe alineadas al imprimir:** cada foto va en un recuadro de tamaño fijo, con la imagen completa y sin recortes; se evita que una foto se parta entre dos páginas.
