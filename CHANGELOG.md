@@ -1,5 +1,13 @@
 # Cambios
 
+## v5.0.2 — 2026-11-04
+
+- **El informe ya no mezcla posiciones viejas.** Al tocar **Comenzar captura**, el asistente borra las lecturas y fotos actuales de las pruebas seleccionadas (pide confirmación si hay datos). Así, si se elige “solo la posición actual”, el informe muestra únicamente esa posición, aunque antes hubiera lecturas de otras posiciones o fotos acumuladas.
+- **OCR del TTR mejorado.** El lector ahora usa segmentación de bloque (PSM 6) para capturar **todos** los números de la pantalla (tap, ratio, error, tensión), no solo el primero.
+- **Selección del valor correcto.** En TTR se elige el número más cercano a la relación teórica de esa posición; si no hay teórica, se prioriza el número con decimales. Debajo del valor aparecen **todos los números detectados** como botones para elegir otro con un toque.
+- Aviso “coincide con la teórica” cuando el valor leído está dentro del 5 % de la relación esperada.
+- Caché `transformadores-pwa-v5.0.2-2026-11-04` y versión visible 5.0.2.
+
 ## v5.0.1 — 2026-11-03
 
 - **Almacenamiento separado de la v4.** La v5 usa claves con prefijo `v5_` y su propia base `unif_informes_v5`; ya no muestra ni modifica los informes de la v4.

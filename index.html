@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="app-version" content="5.0.1">
+  <meta name="app-version" content="5.0.2">
   <meta name="description" content="Pruebas de transformadores: índice horario, TTR, aislamiento, resistencia de devanados e informe con fotos.">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png" sizes="192x192">
@@ -196,7 +196,7 @@ iframe{display:block;width:100%;border:0;background:transparent}
       <button type="button" data-modo="manual" aria-pressed="true">Manual</button>
       <button type="button" data-modo="auto" aria-pressed="false">Automático (fotos guiadas)</button>
     </div>
-    <div id="ver">v5.0.1 · 2026-11-03</div>
+    <div id="ver">v5.0.2 · 2026-11-03</div>
   </div>
   <div id="view">
     <div id="frames">
@@ -296,7 +296,7 @@ var TRS={
 };
 var tipo="3",sel=["H","T"],repMode=false,frames={},panes={};
 var MODO="manual";try{if(LS.getItem("unif_modo")==="auto")MODO="auto";}catch(e){}
-var APP_VERSION={v:"5.0.1",fecha:"2026-11-03"};
+var APP_VERSION={v:"5.0.2",fecha:"2026-11-03"};
 function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 var EMP={nom:"",nit:"",dir:"",tel:"",logo:""};
 function $(id){return document.getElementById(id);}
@@ -852,6 +852,30 @@ function wzSet(test,id,v){
 function wzUnitA(v){return v==="0.001"?"kΩ":(v==="1000"?"GΩ":"MΩ");}
 function wzUnitD(v){return v==="0.001"?"mΩ":"Ω";}
 function wzClamp(v,a,b){v=parseInt(v,10);if(!isFinite(v))v=a;return Math.max(a,Math.min(b,v));}
+function wzDirty(k){
+  try{
+    var w=frames[k].contentWindow;
+    if((w.__fotos||[]).length)return true;
+    if(k==="H")return false;
+    var S=w.S||{};
+    var o=(k==="T")?(S.meas||{}):(k==="A")?(S.v||{}):(S.d||{});
+    var keys=Object.keys(o),i;
+    for(i=0;i<keys.length;i++){if(String(o[keys[i]]).trim()!=="")return true;}
+    if(k==="T"){
+      var vm=S.vm||{};var ks=Object.keys(vm);
+      for(i=0;i<ks.length;i++){if(String(vm[ks[i]]).trim()!=="")return true;}
+    }
+    return false;
+  }catch(e){return false;}
+}
+function wzClearTest(k){
+  try{
+    var d=frames[k].contentDocument,w=frames[k].contentWindow;
+    var b=d.getElementById("clear");
+    if(b)b.click();
+    if(typeof w.__setFotos==="function")w.__setFotos([]);
+  }catch(e){}
+}
 
 function wzCfgFromApp(){
   var n=wzClamp(wzGet("T","n","5"),1,17);
@@ -896,7 +920,7 @@ function wzBuildQueue(c){
     ps.forEach(function(p){
       var fs=c.fases===3?[0,1,2]:[0];
       fs.forEach(function(f){
-        q.push({test:"T",kind:"num",input:"m"+p+"-"+f,unit:c.ttrMode==="T"?"":"V",
+        q.push({test:"T",kind:"num",input:"m"+p+"-"+f,pos:p,phase:f,unit:c.ttrMode==="T"?"":"V",
           label:"TTR · Posición "+p+" · "+(c.fases===3?"Bobina "+ph(f):"Lectura"),
           hint:c.fases===3?"Encuadra la pantalla del TTR con la relación de la bobina "+ph(f)+" y confirma el valor.":"Encuadra la pantalla del TTR con la relación y confirma el valor."});
       });
@@ -946,6 +970,7 @@ function wzRenderConfig(){
   var h='<div class="wz-kick">Modo automático</div><h2>Preparar la captura</h2>';
   h+='<p class="wz-hint">La app te pedirá cada foto en el orden del formulario, intentará leer el valor y tú lo confirmas antes de pasarlo a la prueba.</p>';
   h+='<p class="wz-note">Los criterios de aceptación, las tensiones de prueba y los topes se ajustan en modo Manual. El asistente solo llena las lecturas y adjunta la foto a la prueba.</p>';
+  h+='<p class="wz-note"><b>Importante:</b> al comenzar se borran las lecturas y fotos actuales de las pruebas seleccionadas. Si hay datos, la app te pedirá confirmación.</p>';
   if(!hasT&&!hasA&&!hasD&&!hasH){
     h+='<div class="wz-card"><p class="wz-hint" style="margin:0">No hay pruebas activas. Elige arriba TTR, Aislamiento o Devanados (o “Todas”).</p></div>';
   }
@@ -1002,6 +1027,18 @@ function wzRenderConfig(){
     if($("wzAPrueba"))wzSet("A","prueba",cc2.aislPrueba);
     if($("wzATipo"))wzSet("A","tipo",cc2.aislTipo);
     if($("wzAUnit"))wzSet("A","unit",cc2.aislUnit);
+    var tests=[];
+    if(sel.indexOf("H")>=0)tests.push("H");
+    if(sel.indexOf("T")>=0)tests.push("T");
+    if(sel.indexOf("A")>=0)tests.push("A");
+    if(sel.indexOf("D")>=0)tests.push("D");
+    var dirty=tests.filter(wzDirty);
+    if(dirty.length){
+      var names={H:"Índice horario",T:"TTR",A:"Aislamiento",D:"Devanados"};
+      var msg="Se borrarán las lecturas y fotos actuales de: "+dirty.map(function(k){return names[k];}).join(", ")+".\n\nAsí el informe no mezcla posiciones ni fotos de una captura anterior. ¿Continuar?";
+      if(!window.confirm(msg))return;
+    }
+    tests.forEach(wzClearTest);
     WZ.cfg=cc2;WZ.queue=wzBuildQueue(cc2);WZ.step=0;WZ.photo=null;
     wzRenderStep();
   });
@@ -1028,6 +1065,7 @@ function wzRenderStep(){
     }
   }
   h+='<div class="wz-status" id="wzStatus"></div>';
+  h+='<div class="wz-row" id="wzCands" style="margin-top:6px;gap:6px"></div>';
   h+='<div class="wz-btns"><button type="button" class="act" id="wzBack">Atrás</button><button type="button" class="act" id="wzSkip">Omitir</button><button type="button" class="act main" id="wzOk">'+(s.kind==="photo"?"Adjuntar y seguir":"Confirmar y seguir")+'</button></div>';
   $("wzBody").innerHTML=h;
   if(WZ.photo){$("wzPrev").style.display="block";$("wzImg").src=WZ.photo;}
@@ -1047,6 +1085,7 @@ function wzRenderStep(){
     if($("wzVal"))$("wzVal").value=wzNum(v);
     var el=$("wzStatus");
     if(el)el.innerHTML='Leído: <b>'+wzNum(s.raw)+' '+esc(su.value)+'</b> → <b>'+wzNum(v)+(s.unit?" "+esc(s.unit):"")+'</b>';
+    if(s.nums)wzChips(s.nums,s,su.value);
   });
 }
 
@@ -1113,7 +1152,7 @@ function wzOcrInit(){
       workerBlobURL:false
     });
   }).then(function(w){
-    return w.setParameters({tessedit_char_whitelist:"0123456789.,-",tessedit_pageseg_mode:"7"}).then(function(){
+    return w.setParameters({tessedit_char_whitelist:"0123456789.,-",tessedit_pageseg_mode:"6"}).then(function(){
       WZ.worker=w;WZ.ocrReady=true;return w;
     });
   }).catch(function(e){WZ.ocrLoading=null;throw e;});
@@ -1198,30 +1237,102 @@ function wzConvert(v,from,to){
   return Math.round(v*wzFactor(from)/wzFactor(to)*1e6)/1e6;
 }
 function wzNum(v){return String(Math.round(v*1e6)/1e6);}
+/* Todos los números que aparecen en la lectura (una pantalla puede traer
+   varios: tap, ratio, error, tensión de prueba...). */
+function wzNumbers(txt){
+  var t=String(txt==null?"":txt).replace(/\u2212/g,"-").replace(/,/g,".");
+  var re=/-?\d+(?:\.\d+)?/g,m,out=[],seen={};
+  while((m=re.exec(t))){
+    var v=parseFloat(m[0]);
+    if(!isFinite(v)||Math.abs(v)>1e7)continue;
+    var key=String(v);
+    if(seen[key])continue;
+    seen[key]=1;out.push(v);
+  }
+  return out.slice(0,8);
+}
+/* Elige el número más probable: en TTR, el más cercano a la relación teórica;
+   si no, el que tiene decimales (y más decimales). */
+function wzPick(nums,s){
+  if(!nums||!nums.length)return null;
+  if(s.test==="T"&&s.pos){
+    try{
+      var el=wzd("T").getElementById("th"+s.pos);
+      var th=el?parseFloat(String(el.value).replace(",",".")):NaN;
+      if(isFinite(th)&&th>0){
+        var best=nums[0],bd=Infinity;
+        for(var i=0;i<nums.length;i++){var d=Math.abs(nums[i]-th)/th;if(d<bd){bd=d;best=nums[i];}}
+        if(bd<0.6)return best;
+      }
+    }catch(e){}
+  }
+  var scored=nums.map(function(n){
+    var dec=(String(n).split(".")[1]||"").length;
+    return {n:n,dec:dec,has:dec>0,abs:Math.abs(n)};
+  });
+  scored.sort(function(a,b){
+    if(a.has!==b.has)return a.has?-1:1;
+    if(b.dec!==a.dec)return b.dec-a.dec;
+    return b.abs-a.abs;
+  });
+  return scored[0].n;
+}
+function wzChips(nums,s,src){
+  var box=$("wzCands");if(!box)return;
+  box.innerHTML="";
+  nums.forEach(function(n){
+    var v=(s.unit&&s.unit!=="V")?wzConvert(n,src,s.unit):n;
+    var b=document.createElement("button");
+    b.type="button";
+    b.className="wz-badge"+(Number(n)===Number(s.raw)?" ok":"");
+    b.textContent=wzNum(v)+(s.unit&&s.unit!=="V"?" "+s.unit:"");
+    b.style.cursor="pointer";b.style.border="0";
+    b.onclick=function(){
+      s.raw=n;
+      if($("wzVal"))$("wzVal").value=wzNum(v);
+      var btns=box.querySelectorAll("button");
+      for(var i=0;i<btns.length;i++)btns[i].className="wz-badge";
+      b.className="wz-badge ok";
+      var el=$("wzStatus");
+      if(el)el.innerHTML='Seleccionado: <b>'+wzNum(v)+(s.unit?" "+esc(s.unit):"")+'</b> — confirma o corrige.';
+    };
+    box.appendChild(b);
+  });
+}
 function wzOcrStep(s,data){
-  wzStatus("Leyendo la foto…");
+  wzStatus("Leyendo la foto… (la primera vez tarda unos segundos)");
   return wzOcr(data).then(function(r){
     if(WZ.queue[WZ.step]!==s)return null;
     var txt=r.text.replace(/\s+/g," ");
-    var raw=wzParse(txt,"");
+    var nums=wzNumbers(txt);
     var f=$("wzField");if(f)f.style.display="block";
-    if(raw===null){
+    if(!nums.length){
       wzStatus("No pude leer un número. Escríbelo o repite la foto.",true);
       return null;
     }
-    s.raw=raw;
+    s.raw=wzPick(nums,s);s.nums=nums;
     var su=$("wzSrcUnit");
     var src=su?su.value:(s.srcUnit||s.unit);
     s.srcUnit=src;
+    var raw=s.raw;
     var v=(s.unit&&s.unit!=="V")?wzConvert(raw,src,s.unit):raw;
     if($("wzVal"))$("wzVal").value=wzNum(v);
     var conf=Math.round(r.conf||0);
     var cls=conf>=75?"ok":(conf>=40?"warn":"bad");
     if(!conf)cls="warn";
+    var cerca="";
+    if(s.test==="T"&&s.pos){
+      try{
+        var thEl=wzd("T").getElementById("th"+s.pos);
+        var th=thEl?parseFloat(String(thEl.value).replace(",",".")):NaN;
+        if(isFinite(th)&&th>0&&Math.abs(raw-th)/th<=0.05)cerca=" · coincide con la teórica";
+      }catch(e){}
+    }
     var el=$("wzStatus");
     if(el){
-      el.innerHTML='Leído: <b>'+wzNum(raw)+(s.unit&&s.unit!=="V"?' '+esc(src):"")+'</b> → <b>'+wzNum(v)+(s.unit?" "+esc(s.unit):"")+'</b> <span class="wz-badge '+cls+'">'+(conf?("confianza "+conf+"%"):"confianza baja")+'</span> — confirma o corrige.';
+      el.innerHTML='Leído: <b>'+wzNum(raw)+(s.unit&&s.unit!=="V"?' '+esc(src):"")+'</b> → <b>'+wzNum(v)+(s.unit?" "+esc(s.unit):"")+'</b> <span class="wz-badge '+cls+'">'+(conf?("confianza "+conf+"%"):"confianza baja")+'</span>'+cerca+' — confirma o corrige.';
     }
+    wzChips(nums,s,src);
     return v;
   }).catch(function(e){
     var el=$("wzStatus");
