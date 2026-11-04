@@ -1,5 +1,10 @@
 # Cambios
 
+## v5.1.2 — 2026-11-04
+
+- **Botón Informe visible en cualquier ancho de PC:** la barra de pruebas se acomoda en varias filas, incluso con la ventana a media pantalla; ya no queda oculto el último botón.
+- Caché `transformadores-pwa-v5.1.2-2026-11-04` y versión visible 5.1.2.
+
 ## v5.1.1 — 2026-11-04
 
 - **Barra de pruebas en PC:** los botones se acomodan en varias filas y el botón **Informe** ya queda visible; el informe usa más ancho de pantalla.
