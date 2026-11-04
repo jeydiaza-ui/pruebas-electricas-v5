@@ -1,5 +1,10 @@
 # Cambios
 
+## v5.1.5 — 2026-11-04
+
+- **Color en los resultados de AFQ y PCB dentro del informe:** la columna de resultados se imprime en amarillo y las referencias quedan sin color, con la leyenda “Resultados en amarillo · referencias fijas”.
+- Caché `transformadores-pwa-v5.1.5-2026-11-04` y versión visible 5.1.5.
+
 ## v5.1.4 — 2026-11-04
 
 - **Descripciones fijas en el informe** antes de TTR, Aislamiento y Devanados, con el texto largo del informe de referencia; no son editables y no aparecen en la pantalla de llenado.
