@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="app-version" content="5.1.0">
+  <meta name="app-version" content="5.1.1">
   <meta name="description" content="Pruebas de transformadores: índice horario, TTR, aislamiento, resistencia de devanados e informe con fotos.">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png" sizes="192x192">
@@ -51,6 +51,11 @@ iframe{display:block;width:100%;border:0;background:transparent}
 /* informe */
 #rep{display:none}
 .repin{max-width:560px;margin:0 auto;padding:16px 14px 40px}
+@media (min-width:760px){
+  #seg{flex-wrap:wrap;overflow:visible;max-width:min(1400px,96vw);justify-content:center}
+  .repin{max-width:min(1200px,96vw)}
+  #ver{max-width:min(1400px,96vw)}
+}
 .repin h2{font-size:20px;margin:0 0 4px}
 .repin .sub{margin:0 0 12px;font-size:14px;color:var(--ts)}
 .repin label{display:block;font-size:12px;color:var(--ts);margin:0 0 3px}
@@ -210,7 +215,7 @@ iframe{display:block;width:100%;border:0;background:transparent}
       <button type="button" data-modo="manual" aria-pressed="true">Manual</button>
       <button type="button" data-modo="auto" aria-pressed="false">Automático (fotos guiadas)</button>
     </div>
-    <div id="ver">v5.1.0 · 2026-11-04</div>
+    <div id="ver">v5.1.1 · 2026-11-04</div>
   </div>
   <div id="view">
     <div id="frames">
@@ -316,7 +321,7 @@ var TRS={
 };
 var tipo="3",sel=["H","T"],repMode=false,frames={},panes={};
 var MODO="manual";try{if(LS.getItem("unif_modo")==="auto")MODO="auto";}catch(e){}
-var APP_VERSION={v:"5.1.0",fecha:"2026-11-04"};
+var APP_VERSION={v:"5.1.1",fecha:"2026-11-04"};
 function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 var EMP={nom:"",nit:"",dir:"",tel:"",logo:""};
 function $(id){return document.getElementById(id);}

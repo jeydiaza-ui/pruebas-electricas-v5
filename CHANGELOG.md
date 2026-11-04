@@ -1,5 +1,10 @@
 # Cambios
 
+## v5.1.1 — 2026-11-04
+
+- **Barra de pruebas en PC:** los botones se acomodan en varias filas y el botón **Informe** ya queda visible; el informe usa más ancho de pantalla.
+- Caché `transformadores-pwa-v5.1.1-2026-11-04` y versión visible 5.1.1.
+
 ## v5.1.0 — 2026-11-04
 
 - **Pruebas de aceite AFQ y PCB** con selector AFQ / PCB / ambos.
