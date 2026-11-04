@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f7a5c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="app-version" content="5.0.0">
+  <meta name="description" content="Pruebas de transformadores: índice horario, TTR, aislamiento, resistencia de devanados e informe con fotos.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="icon-192.png">
+<title>Transformadores: pruebas, referencias e informe</title>
+<style>
+:root{
+  --bg:#f6f5f1; --surface:#ffffff; --tp:#1d1d1b; --ts:#5c5b56; --tm:#8d8b84; --border:#d9d6cc; --bs:#b9b6aa;
+  --sel-bg:#1d1d1b; --sel-tx:#ffffff; --accent:#0f7a5c;
+  --ok:#1b7f4b; --ok-bg:#dff3e6; --bad:#b3261e; --bad-bg:#fbe3e0; --warn:#7a4b00; --warn-bg:#fdf0d5; --none-bg:#e8e6df;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#161614; --surface:#1f1f1c; --tp:#f1efe8; --ts:#b5b2a7; --tm:#85837a; --border:#3a3a35; --bs:#58574f; --sel-bg:#f1efe8; --sel-tx:#161614; --accent:#4cc9a2;
+    --ok:#6fdca4; --ok-bg:#16382a; --bad:#ff9a8c; --bad-bg:#4a201b; --warn:#f2c46b; --warn-bg:#40320f; --none-bg:#2f2f2a;}
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tp);font-family:var(--font)}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;padding-top:env(safe-area-inset-top,0px)}
+#bar{flex:none;padding:8px 12px 10px;border-bottom:1px solid var(--border);background:var(--surface)}
+.lab{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--tm);max-width:560px;margin:0 auto 4px}
+#tipo{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;max-width:560px;margin:0 auto 8px}
+#seg{display:flex;gap:6px;overflow-x:auto;max-width:560px;margin:0 auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#seg::-webkit-scrollbar{display:none}
+#tipo button,#seg button{font:inherit;font-size:14px;font-weight:500;line-height:1.2;min-height:44px;padding:6px 10px;
+  border:1px solid var(--bs);background:var(--bg);color:var(--tp);cursor:pointer;-webkit-tap-highlight-color:transparent}
+#tipo button{border-radius:10px;font-size:13px}
+#seg button{flex:0 0 auto;border-radius:22px;padding:6px 14px;white-space:nowrap}
+#tipo button[aria-pressed="true"],#seg button[aria-pressed="true"]{background:var(--sel-bg);color:var(--sel-tx);border-color:var(--sel-bg)}
+#seg button[data-k="REP"]{border-color:var(--accent);font-weight:600}
+#tipo button:focus-visible,#seg button:focus-visible,.act:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#view{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
+.pane{display:none}
+.pane.on{display:block}
+.pane.on ~ .pane.on{border-top:10px solid var(--border)}
+iframe{display:block;width:100%;border:0;background:transparent}
+#end{display:none;padding:16px 14px 28px;max-width:520px;margin:0 auto}
+.act{font:inherit;font-size:15px;font-weight:600;min-height:48px;padding:10px 16px;border-radius:12px;border:1px solid var(--bs);background:var(--surface);color:var(--tp);cursor:pointer}
+.act.main{background:var(--accent);border-color:var(--accent);color:#fff;width:100%}
+/* informe */
+#rep{display:none}
+.repin{max-width:560px;margin:0 auto;padding:16px 14px 40px}
+.repin h2{font-size:20px;margin:0 0 4px}
+.repin .sub{margin:0 0 12px;font-size:14px;color:var(--ts)}
+.repin label{display:block;font-size:12px;color:var(--ts);margin:0 0 3px}
+.repin input[type=text],.repin textarea{font:inherit;font-size:16px;width:100%;min-height:44px;padding:8px 10px;border:1px solid var(--bs);border-radius:9px;background:var(--bg);color:var(--tp)}
+.repin input[type=file]{font:inherit;font-size:14px;width:100%;color:var(--ts)}
+.repin textarea{min-height:70px;resize:vertical}
+.fs{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin:0 0 12px}
+.fs h3{font-size:15px;margin:0 0 10px;color:var(--ts)}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.full{grid-column:1/-1}
+.lgrow{display:flex;align-items:center;gap:10px}
+.lgrow img{max-height:56px;max-width:140px;border-radius:6px;background:#fff;border:1px solid var(--border)}
+.lgrow button{font:inherit;font-size:13px;min-height:36px;padding:4px 10px;border-radius:8px;border:1px solid var(--bs);background:var(--surface);color:var(--tp);cursor:pointer}
+.rc{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin:0 0 12px}
+.rc h3{font-size:15px;margin:0 0 6px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.rc pre{margin:6px 0 0;white-space:pre-wrap;word-break:break-word;font:12.5px/1.5 ui-monospace,Menlo,Consolas,monospace;color:var(--ts)}
+.rc .kv{font-size:14px;margin:2px 0;color:var(--ts)}
+.rc .kv b{color:var(--tp)}
+.hdr{display:flex;gap:12px;align-items:center}
+.hdr img{max-height:64px;max-width:150px;border-radius:6px;background:#fff}
+.hdr .en{font-size:17px;font-weight:700;color:var(--tp)}
+.bd{font-size:12px;font-weight:700;border-radius:7px;padding:2px 9px;white-space:nowrap;background:var(--none-bg);color:var(--tm)}
+.bd.ok{background:var(--ok-bg);color:var(--ok)} .bd.bad{background:var(--bad-bg);color:var(--bad)}
+.bd.warn{background:var(--warn-bg);color:var(--warn)} .bd.info{background:var(--none-bg);color:var(--ts)}
+.rc.gen{border-width:2px}
+.rc.gen.ok{border-color:var(--ok);background:var(--ok-bg)} .rc.gen.bad{border-color:var(--bad);background:var(--bad-bg)} .rc.gen.warn{border-color:var(--warn);background:var(--warn-bg)}
+.rc.gen .big{font-size:22px;font-weight:700}
+.rc.gen.ok .big{color:var(--ok)} .rc.gen.bad .big{color:var(--bad)} .rc.gen.warn .big{color:var(--warn)}
+.figs{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
+.fig{background:#fff;border-radius:10px;padding:8px;border:1px solid var(--border)}
+.fig svg{display:block;width:100%;height:auto;max-width:420px;margin:0 auto}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0}
+.btnrow .act{flex:1 1 30%}
+#r_ta{display:none;width:100%;height:140px;font:12px monospace;margin-top:8px}
+.note{font-size:12.5px;color:var(--tm);margin:12px 2px 0}
+#r_new,#seg button[data-k="NEW"]{border-color:var(--bad);color:var(--bad)}
+.obsr{font-size:14px;border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--tp)}
+.tt{font-size:13px;font-weight:700;margin:12px 0 4px;color:var(--ts)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tw table{border-collapse:collapse;width:100%;font-size:12px}
+.tw th,.tw td{border:1px solid var(--border);padding:4px 6px;text-align:center;white-space:nowrap;color:var(--tp)}
+.tw th{background:var(--none-bg);font-weight:700}
+.tw td.ok{background:var(--ok-bg);color:var(--ok);font-weight:700}
+.tw td.bad{background:var(--bad-bg);color:var(--bad);font-weight:700}
+.tw td.wrap{white-space:normal;text-align:left;min-width:160px}
+.fotosr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.fotosr img{width:100%;border-radius:8px;border:1px solid var(--border);display:block}
+.bd.pend{background:var(--warn-bg);color:var(--warn)}
+@media print{
+  .tw{overflow:visible}
+  .tw table{font-size:10px}
+  .tw th,.tw td{white-space:normal;border-color:#888;color:#000}
+  .tw th{background:#eee}
+  .tw td.ok{background:#dff3e6;color:#0b5d2f}
+  .tw td.bad{background:#fbe3e0;color:#8a1a12}
+  .fotosr{grid-template-columns:repeat(3,1fr)}
+  .fotosr img{break-inside:avoid}
+}
+@media print{
+  #bar,#frames,#end,.nop{display:none!important}
+  html,body{height:auto;background:#fff;color:#000}
+  #app{display:block;height:auto;padding:0}
+  #view{overflow:visible}
+  #rep{display:block!important}
+  .repin{max-width:none;padding:0}
+  .rc{border-color:#999;background:#fff}
+  .tw,.fig,.figs{break-inside:avoid}
+  .tw tr{break-inside:avoid}
+  .tt{break-after:avoid}
+  .rc pre,.rc .kv,.hdr .en{color:#000}
+  .figs{grid-template-columns:1fr 1fr}
+  .fig,.hdr img{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+.norma{font-size:12.5px;color:var(--ts);margin:0 0 8px;break-after:avoid;page-break-after:avoid}
+.rc h3{break-after:avoid;page-break-after:avoid}
+@media print{.rc h3,.norma,.tt{break-after:avoid;page-break-after:avoid}}
+#ver{max-width:560px;margin:2px auto 0;text-align:right;font-size:11px;color:var(--tm);letter-spacing:.02em}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+#storeinfo{font-variant-numeric:tabular-nums}
+/* ---------- modo de captura ---------- */
+#modo{display:grid;grid-template-columns:1fr 1.4fr;gap:6px;max-width:560px;margin:0 auto 8px}
+#modo button{font:inherit;font-size:13px;font-weight:600;min-height:40px;padding:6px 10px;border:1px solid var(--bs);border-radius:9px;background:var(--surface);color:var(--tp);cursor:pointer;-webkit-tap-highlight-color:transparent}
+#modo button[aria-pressed="true"]{background:var(--sel-bg);color:var(--sel-tx);border-color:var(--sel-bg)}
+/* ---------- asistente ---------- */
+#wiz{position:fixed;inset:0;z-index:70;display:none;flex-direction:column;background:var(--bg);padding-top:env(safe-area-inset-top,0px)}
+#wiz.on{display:flex}
+.wz-head{flex:none;display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--surface)}
+.wz-head b{font-size:14px;flex:1}
+.wz-head span{font-size:12px;color:var(--tm);font-variant-numeric:tabular-nums}
+.wz-head button{font:inherit;font-size:13px;font-weight:600;min-height:38px;padding:4px 12px;border-radius:9px;border:1px solid var(--bs);background:var(--surface);color:var(--tp);cursor:pointer}
+.wz-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:14px 14px 32px;width:100%;max-width:620px;margin:0 auto}
+.wz-kick{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tm)}
+.wz-body h2{font-size:21px;line-height:1.25;margin:4px 0 6px}
+.wz-hint{font-size:14px;color:var(--ts);margin:0 0 10px}
+.wz-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin:0 0 12px}
+.wz-card h3{font-size:14px;margin:0 0 8px;color:var(--ts)}
+.wz-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0}
+.wz-row label{font-size:14px;color:var(--tp)}
+.wz-row input[type=number],.wz-row input[type=text],.wz-row select{font:inherit;font-size:15px;min-height:42px;padding:6px 8px;border:1px solid var(--bs);border-radius:9px;background:var(--bg);color:var(--tp);min-width:0}
+.wz-row input[type=number]{width:84px}
+.wz-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.wz-btns .act{flex:1 1 40%}
+.wz-btns label.act{display:flex;align-items:center;justify-content:center;cursor:pointer}
+.wz-prev{display:none;margin:10px 0 0;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#111}
+.wz-prev img{display:block;width:100%;height:auto}
+.wz-field{margin-top:12px}
+.wz-field label{display:block;font-size:12px;color:var(--ts);margin-bottom:4px}
+.wz-field input{width:100%;font:inherit;font-size:26px;font-weight:700;text-align:center;padding:10px;border:1px solid var(--bs);border-radius:11px;background:var(--surface);color:var(--tp);font-variant-numeric:tabular-nums}
+.wz-badge{display:inline-block;font-size:12px;font-weight:700;border-radius:7px;padding:2px 8px;background:var(--none-bg);color:var(--ts);margin-left:6px}
+.wz-badge.ok{background:var(--ok-bg);color:var(--ok)}
+.wz-badge.warn{background:var(--warn-bg);color:var(--warn)}
+.wz-badge.bad{background:var(--bad-bg);color:var(--bad)}
+.wz-note{font-size:12.5px;color:var(--tm);margin:6px 0 0}
+.wz-note.bad{color:var(--bad)}
+.wz-status{font-size:12.5px;color:var(--ts);margin:6px 0 0}
+.wz-list{margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--ts)}
+.wz-list li{margin:3px 0}
+@media print{#wiz{display:none!important}}
+@page{size:A4;margin:12mm}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="bar">
+    <div class="lab">Tipo de transformador</div>
+    <div id="tipo" role="group" aria-label="Tipo de transformador">
+      <button type="button" data-t="3" aria-pressed="false">Trifásico</button>
+      <button type="button" data-t="M13" aria-pressed="false">Monofásico 13,2 kV</button>
+      <button type="button" data-t="M7" aria-pressed="false">Monofásico 7,6 kV</button>
+    </div>
+    <div class="lab">Pruebas</div>
+    <div id="seg" role="group" aria-label="Elige una o varias pruebas">
+      <button type="button" data-k="H" aria-pressed="false">Índice horario</button>
+      <button type="button" data-k="T" aria-pressed="false">TTR</button>
+      <button type="button" data-k="A" aria-pressed="false">Aislamiento</button>
+      <button type="button" data-k="D" aria-pressed="false">Devanados</button>
+      <button type="button" data-k="ALL" aria-pressed="false">Todas</button>
+      <button type="button" data-k="REP" aria-pressed="false">Informe</button>
+      <button type="button" data-k="NEW" aria-pressed="false">Nuevo trabajo</button>
+    </div>
+    <div class="lab">Modo de captura</div>
+    <div id="modo" role="group" aria-label="Modo de captura">
+      <button type="button" data-modo="manual" aria-pressed="true">Manual</button>
+      <button type="button" data-modo="auto" aria-pressed="false">Automático (fotos guiadas)</button>
+    </div>
+    <div id="ver">v5.0.0 · 2026-11-03</div>
+  </div>
+  <div id="view">
+    <div id="frames">
+      <div id="end"><button type="button" class="act main" id="endbtn">Generar informe de las pruebas</button></div>
+    </div>
+    <div id="rep">
+      <div class="repin">
+        <h2 id="reptitle">Informe de pruebas</h2>
+        <p class="sub nop">Reúne los resultados de las pruebas que tienes activadas arriba.</p>
+        <div class="nop">
+          <div class="fs">
+            <h3>Datos de la empresa (se registran una sola vez)</h3>
+            <div class="g2">
+              <div class="full"><label for="emp_logo">Logo de la empresa</label>
+                <div class="lgrow"><img id="emp_prev" alt="Logo" style="display:none"><input id="emp_logo" type="file" accept="image/*"><button type="button" id="emp_quit" style="display:none">Quitar</button></div></div>
+              <div class="full"><label for="emp_nom">Nombre de la empresa</label><input id="emp_nom" type="text"></div>
+              <div><label for="emp_nit">NIT</label><input id="emp_nit" type="text"></div>
+              <div><label for="emp_tel">Teléfono</label><input id="emp_tel" type="text" inputmode="tel"></div>
+              <div class="full"><label for="emp_dir">Dirección</label><input id="emp_dir" type="text"></div>
+            </div>
+          </div>
+          <div class="fs">
+            <h3>Consecutivo del informe</h3>
+            <div class="g3">
+              <div><label for="cons_pref">Prefijo</label><input id="cons_pref" type="text"></div>
+              <div><label for="cons_code">Código empresa/técnico</label><input id="cons_code" type="text" placeholder="Opcional"></div>
+              <div><label for="cons_n">Número de este informe</label><input id="cons_n" type="text" inputmode="numeric"></div>
+            </div>
+            <p class="note" style="margin-top:8px">El número sube solo al tocar Nuevo trabajo y no deja repetir un número ya usado por otro informe. El código opcional separa la serie de cada empresa o técnico (por ejemplo <b>INF-JD-0001</b>).</p>
+          </div>
+          <div class="fs">
+            <h3>Datos del cliente</h3>
+            <div class="g2">
+              <div class="full"><label for="ri_cli">Nombre del cliente</label><input id="ri_cli" type="text"></div>
+              <div class="full"><label for="ri_dir">Dirección</label><input id="ri_dir" type="text"></div>
+              <div><label for="ri_nit">NIT / Cédula</label><input id="ri_nit" type="text"></div>
+              <div><label for="ri_tel">Teléfono</label><input id="ri_tel" type="text" inputmode="tel"></div>
+              <div class="full"><label for="ri_resp">Responsable de la prueba</label><input id="ri_resp" type="text"></div>
+            </div>
+          </div>
+          <div class="fs">
+            <h3>Datos del equipo</h3>
+            <div class="g2">
+              <div><label for="ri_marca">Marca</label><input id="ri_marca" type="text"></div>
+              <div><label for="ri_tipoeq">Tipo</label><select id="ri_tipoeq"><option value="">—</option><option>Seco</option><option>Convencional (aceite)</option><option>Pad-mounted</option><option>Subestación</option><option>Otro</option></select></div>
+              <div><label for="ri_ser">Serie</label><input id="ri_ser" type="text"></div>
+              <div><label for="ri_kva">Potencia (kVA)</label><input id="ri_kva" type="text"></div>
+              <div class="full"><label for="ri_ten">Tensión</label><select id="ri_ten"><option value="">—</option><option>Trifásica</option><option>Monofásica</option><option>Bifásica</option><option>Otra</option></select></div>
+            </div>
+          </div>
+          <div class="fs">
+            <div class="g2"><div class="full"><label for="ri_obs">Observaciones</label><textarea id="ri_obs"></textarea></div></div>
+          </div>
+        </div>
+        <div id="repbody"></div>
+        <p class="note" id="repver"></p>
+        <div class="btnrow nop">
+          <button type="button" class="act" id="r_share">Compartir</button>
+          <button type="button" class="act" id="r_copy">Copiar</button>
+          <button type="button" class="act" id="r_print">Imprimir / PDF</button>
+          <button type="button" class="act" id="r_save">Guardar informe</button>
+          <button type="button" class="act" id="r_new">Nuevo trabajo</button>
+        </div>
+        <textarea id="r_ta" class="nop" readonly aria-label="Informe en texto"></textarea>
+        <div class="fs nop" style="margin-top:14px"><h3>Informes guardados en este dispositivo</h3><div id="savedList"></div>
+        <div class="btnrow" style="margin-top:10px"><button type="button" class="act" id="imp_btn">Importar informe o respaldo</button> <button type="button" class="act" id="exp_all">Exportar todo</button></div>
+        <p class="note" id="storeinfo"></p>
+        <input type="file" id="imp_file" accept=".json,application/json" hidden>
+        <p class="note" id="savemsg" role="status" aria-live="polite"></p></div>
+        <p class="note nop">Para guardar en PDF usa Imprimir y elige "Guardar como PDF"; ahí salen el logo y los gráficos. Compartir y Copiar envían solo texto. Los datos de la empresa y el logo se guardan en este navegador. Nuevo trabajo borra el trabajo en pantalla (no los informes guardados) y pasa al siguiente número. Guarda el informe antes de empezar otro y genera el PDF antes de borrar.</p>
+        <p class="note nop"><b>Respaldo:</b> los informes viven solo en este navegador. Usa <b>Exportar todo</b> de vez en cuando y guarda el archivo fuera del teléfono (nube, correo o PC). Puedes restaurarlo con <b>Importar informe o respaldo</b>.</p>
+      </div>
+    </div>
+  </div>
+  <div id="wiz" role="dialog" aria-modal="true" aria-labelledby="wzTitle">
+    <div class="wz-head">
+      <b id="wzTitle">Captura guiada</b>
+      <span id="wzProg"></span>
+      <button type="button" id="wzClose">Salir</button>
+    </div>
+    <div class="wz-body" id="wzBody"></div>
+  </div>
+</div>
+<script>
+var SRC={H:"\u003c!DOCTYPE html\u003e\n\u003chtml lang=\"es\"\u003e\n\u003chead\u003e\n\u003cmeta charset=\"utf-8\"\u003e\n\u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\"\u003e\n\u003cmeta name=\"theme-color\" content=\"#f6f5f1\"\u003e\n\u003ctitle\u003eTransformadores: índice horario y cableado\u003c/title\u003e\n\u003cstyle\u003e\n:root{\n  --bg:#f6f5f1; --surface:#ffffff; --surface-1:#efede7;\n  --text-primary:#1d1d1b; --text-secondary:#5c5b56; --text-muted:#8d8b84;\n  --border:#d9d6cc; --border-strong:#b9b6aa;\n  --at:#c4492a; --at-text:#8f3318; --bt:#0f7a5c; --bt-text:#0a5a43;\n  --sel-bg:#1d1d1b; --sel-text:#ffffff;\n  --font:system-ui,-apple-system,\"Segoe UI\",Roboto,\"Helvetica Neue\",Arial,sans-serif;\n}\n@media (prefers-color-scheme: dark){\n  :root{\n    --bg:#161614; --surface:#1f1f1c; --surface-1:#2a2a26;\n    --text-primary:#f1efe8; --text-secondary:#b5b2a7; --text-muted:#85837a;\n    --border:#3a3a35; --border-strong:#58574f;\n    --at:#ee8a68; --at-text:#f4b49c; --bt:#4cc9a2; --bt-text:#8ee0c4;\n    --sel-bg:#f1efe8; --sel-text:#161614;\n  }\n}\n*{box-sizing:border-box}\nhtml{-webkit-text-size-adjust:100%}\nbody{\n  margin:0; background:var(--bg); color:var(--text-primary); font-family:var(--font);\n  line-height:1.5; padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);\n}\nmain{max-width:480px; margin:0 auto; padding:20px 16px 40px}\nh1{font-size:22px; font-weight:600; margin:0 0 4px; letter-spacing:-0.01em}\n.sub{margin:0 0 16px; color:var(--text-secondary); font-size:15px}\n.grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:0 0 16px}\n.grid button{\n  font:inherit; font-size:16px; font-weight:500; padding:12px 0; min-height:48px;\n  border:1px solid var(--border-strong); border-radius:10px; background:var(--surface);\n  color:var(--text-primary); cursor:pointer; -webkit-tap-highlight-color:transparent;\n}\n.grid button[aria-pressed=\"true\"]{background:var(--sel-bg); color:var(--sel-text); border-color:var(--sel-bg)}\n.grid button:focus-visible{outline:3px solid var(--bt); outline-offset:2px}\n.card{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:12px; margin:0 0 14px}\n.card h2{font-size:15px; font-weight:600; margin:2px 4px 6px; color:var(--text-secondary)}\nsvg{display:block; width:100%; height:auto}\n#info{background:var(--surface-1); border-radius:12px; padding:14px 16px; font-size:15px}\n#info .t{font-size:18px; font-weight:600; margin-bottom:6px}\n#info .d{color:var(--text-secondary)}\n.leg{display:flex; gap:18px; justify-content:center; font-size:13px; color:var(--text-secondary); margin:2px 0 4px}\n.leg i{display:inline-block; width:12px; height:12px; border-radius:3px; vertical-align:-1px; margin-right:6px}\n.foot{font-size:13px; color:var(--text-muted); margin:16px 4px 0}\n.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:0 4px}\n.card label{display:block;font-size:12px;color:var(--text-secondary);margin:0 0 3px}\n.card input{font:inherit;font-size:16px;width:100%;min-height:44px;padding:8px 10px;border:1px solid var(--border-strong);border-radius:9px;background:var(--bg);color:var(--text-primary)}\n.mut{color:var(--text-muted)} .bad{color:var(--at-text)} .foot2{font-size:13px;color:var(--text-muted);margin:10px 4px 0}\n#polres{padding:0 4px;margin-top:10px;font-size:14px}\n\u003c/style\u003e\n\u003c/head\u003e\n\u003cbody\u003e\n\u003cmain\u003e\n  \u003ch1 id=\"ttl\"\u003eTransformadores trifásicos\u003c/h1\u003e\n  \u003cp class=\"sub\" id=\"sub1\"\u003eToca un grupo de conexión para ver su cableado y su reloj.\u003c/p\u003e\n\n  \u003cdiv id=\"btns\" class=\"grid\" role=\"group\" aria-label=\"Grupo de conexión\"\u003e\u003c/div\u003e\n\n  \u003cdiv id=\"info\" aria-live=\"polite\"\u003e\u003c/div\u003e\n\n  \u003csection class=\"card\" style=\"margin-top:14px\"\u003e\n    \u003ch2\u003eCableado de bobinas\u003c/h2\u003e\n    \u003csvg id=\"wire\" viewBox=\"0 0 380 365\" role=\"img\" aria-label=\"Cableado\"\u003e\u003c/svg\u003e\n    \u003cdiv class=\"leg\"\u003e\u003cspan\u003e\u003ci style=\"background:var(--at)\"\u003e\u003c/i\u003eAT (arriba)\u003c/span\u003e\u003cspan\u003e\u003ci style=\"background:var(--bt)\"\u003e\u003c/i\u003eBT (abajo)\u003c/span\u003e\u003c/div\u003e\n  \u003c/section\u003e\n\n  \u003csection class=\"card\"\u003e\n    \u003ch2\u003eReloj del índice horario\u003c/h2\u003e\n    \u003csvg id=\"clock\" viewBox=\"0 0 380 250\" role=\"img\" aria-label=\"Reloj\"\u003e\u003c/svg\u003e\n    \u003cdiv class=\"leg\"\u003e\u003cspan\u003e\u003ci style=\"background:var(--at)\"\u003e\u003c/i\u003eAT (siempre a las 12)\u003c/span\u003e\u003cspan\u003e\u003ci style=\"background:var(--bt)\"\u003e\u003c/i\u003eBT\u003c/span\u003e\u003c/div\u003e\n  \u003c/section\u003e\n\n  \u003csection class=\"card\" id=\"pol\" style=\"display:none\"\u003e\n    \u003ch2\u003ePrueba de polaridad con voltímetro\u003c/h2\u003e\n    \u003cdiv class=\"g2\"\u003e\n      \u003cdiv\u003e\u003clabel for=\"pa\"\u003eTensión AT (V)\u003c/label\u003e\u003cinput id=\"pa\" type=\"text\" inputmode=\"decimal\"\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"pb\"\u003eTensión BT (V)\u003c/label\u003e\u003cinput id=\"pb\" type=\"text\" inputmode=\"decimal\"\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"pv\"\u003eTensión aplicada en AT (V)\u003c/label\u003e\u003cinput id=\"pv\" type=\"text\" inputmode=\"decimal\" value=\"120\"\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"pr\"\u003eLectura entre H2 y X2 (V)\u003c/label\u003e\u003cinput id=\"pr\" type=\"text\" inputmode=\"decimal\"\u003e\u003c/div\u003e\n    \u003c/div\u003e\n    \u003cdiv id=\"polres\"\u003e\u003c/div\u003e\n    \u003cp class=\"foot2\"\u003eUne H1 con X1 con un puente, aplica una tensión baja entre H1 y H2 y mide entre H2 y X2. Si la lectura es mayor que la aplicada, la polaridad es aditiva. Si es menor, es sustractiva.\u003c/p\u003e\n  \u003c/section\u003e\n\n  \u003cp class=\"foot\"\u003eEsquema didáctico. Las barras grises son las columnas del núcleo. El índice horario real también depende del sentido de arrollamiento y del orden de fases. Funciona sin conexión.\u003c/p\u003e\n\u003cstyle\u003e\n.fotos{background:var(--surface,#fff);border:1px solid var(--border,#d9d6cc);border-radius:14px;padding:14px;margin:12px 0 0}\n.fotos h2{font-size:15px;font-weight:600;margin:0 0 10px;color:var(--ts,var(--text-secondary,#5c5b56))}\n.fotos .frow{display:flex;gap:8px;flex-wrap:wrap}\n.fotos .fbtn{flex:1 1 40%;display:flex;align-items:center;justify-content:center;min-height:48px;padding:8px 12px;border-radius:10px;border:1px solid var(--bs,var(--border-strong,#b9b6aa));background:var(--bg,#f6f5f1);color:var(--tp,var(--text-primary,#1d1d1b));font:inherit;font-size:15px;font-weight:600;cursor:pointer;margin:0}\n.fotos .fgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}\n.fotos .fth{position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--border,#d9d6cc);aspect-ratio:1/1;background:#fff}\n.fotos .fth img{width:100%;height:100%;object-fit:cover;display:block}\n.fotos .fth button{position:absolute;top:4px;right:4px;width:30px;height:30px;border-radius:15px;border:0;background:rgba(0,0,0,.65);color:#fff;font-size:18px;line-height:1;cursor:pointer;padding:0}\n.fotos .nt{font-size:12.5px;color:var(--tm,var(--text-muted,#8d8b84));margin:10px 2px 0}\n\u003c/style\u003e\n\u003csection class=\"fotos\" id=\"fotosBox\"\u003e\n  \u003ch2\u003eFotos de la prueba\u003c/h2\u003e\n  \u003cdiv class=\"frow\"\u003e\n    \u003clabel class=\"fbtn\"\u003eTomar foto\u003cinput id=\"fotoCam\" type=\"file\" accept=\"image/*\" capture=\"environment\" hidden\u003e\u003c/label\u003e\n    \u003clabel class=\"fbtn\"\u003eGalería\u003cinput id=\"fotoGal\" type=\"file\" accept=\"image/*\" multiple hidden\u003e\u003c/label\u003e\n  \u003c/div\u003e\n  \u003cdiv id=\"fotoGrid\" class=\"fgrid\"\u003e\u003c/div\u003e\n  \u003cp class=\"nt\" id=\"fotoN\"\u003e\u003c/p\u003e\n  \u003cp class=\"nt\"\u003eLas fotos se guardan solo cuando guardas el informe en este dispositivo.\u003c/p\u003e\n\u003c/section\u003e\n\u003cscript\u003e\n(function(){\n  var fotos=window.__fotos=[];window.__setFotos=function(a){fotos.length=0;(a||[]).forEach(function(x){fotos.push(x);});draw();};\n  var box=document.getElementById(\"fotoGrid\"),nt=document.getElementById(\"fotoN\");\n  function draw(){\n    box.innerHTML=\"\";\n    fotos.forEach(function(src,i){\n      var d=document.createElement(\"div\");d.className=\"fth\";\n      var im=document.createElement(\"img\");im.src=src;im.alt=\"Foto \"+(i+1);\n      var b=document.createElement(\"button\");b.type=\"button\";b.textContent=\"×\";b.setAttribute(\"aria-label\",\"Quitar foto \"+(i+1));\n      b.onclick=function(){fotos.splice(i,1);draw();};\n      d.appendChild(im);d.appendChild(b);box.appendChild(d);\n    });\n    nt.textContent=fotos.length?fotos.length+(fotos.length===1?\" foto lista\":\" fotos listas\")+\" para el informe\":\"Sin fotos\";\n  }\n  function add(file){\n    var rd=new FileReader();\n    rd.onload=function(){\n      var img=new Image();\n      img.onload=function(){\n        var sc=Math.min(1,1000/Math.max(img.width,img.height)),c=document.createElement(\"canvas\");\n        c.width=Math.max(1,Math.round(img.width*sc));c.height=Math.max(1,Math.round(img.height*sc));\n        c.getContext(\"2d\").drawImage(img,0,0,c.width,c.height);\n        fotos.push(c.toDataURL(\"image/jpeg\",0.72));draw();\n      };\n      img.src=rd.result;\n    };\n    rd.readAsDataURL(file);\n  }\n  [\"fotoCam\",\"fotoGal\"].forEach(function(id){\n    document.getElementById(id).addEventListener(\"change\",function(e){\n      var fs=e.target.files;for(var i=0;i\u003cfs.length;i++)add(fs[i]);e.target.value=\"\";\n    });\n  });\n  draw();\n})();\n\u003c/script\u003e\n\u003cstyle\u003e\n.obsb{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin:12px 0 0}\n.obsb h2{font-size:15px;font-weight:600;margin:0 0 10px;color:var(--text-secondary)}\n.obsb textarea{display:block;width:100%;height:90px;margin:0;font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--border-strong);border-radius:9px;background:var(--bg);color:var(--text-primary);resize:vertical}\n\u003c/style\u003e\n\u003csection class=\"obsb\" id=\"obsBox\"\u003e\n  \u003ch2\u003eObservaciones\u003c/h2\u003e\n  \u003ctextarea id=\"obsText\" placeholder=\"Observaciones de esta prueba (opcional)\"\u003e\u003c/textarea\u003e\n\u003c/section\u003e\n\u003cscript\u003e\n(function(){\n  var ta=document.getElementById(\"obsText\");\n  function key(){return \"hobs_\"+((typeof TR!==\"undefined\"&&TR&&TR.tipo)?TR.tipo:\"3\");}\n  window.__obs=\"\";\n  window.obsLoad=function(){\n    var v=\"\";try{v=localStorage.getItem(key())||\"\";}catch(e){}\n    ta.value=v;window.__obs=v;\n  };\n  ta.addEventListener(\"input\",function(){\n    window.__obs=ta.value;\n    try{localStorage.setItem(key(),ta.value);}catch(e){}\n  });\n  window.obsLoad();\n})();\n\u003c/script\u003e\n\u003c/main\u003e\n\n\u003cscript\u003e\nvar X=[70,190,310];\nvar G=[\n{k:'Yy0',h:0,p:'Y',s:'Y',w:0,t:'Sin desfase.'},\n{k:'Yy6',h:6,p:'Y',s:'Y',w:1,t:'Bobinas de BT invertidas: BT en oposición.'},\n{k:'Dy1',h:1,p:'D2',s:'Y',w:0,t:'BT atrasa 30°.'},\n{k:'Dy5',h:5,p:'D2',s:'Y',w:0,t:'BT atrasa 150°.'},\n{k:'Dy11',h:11,p:'D1',s:'Y',w:0,t:'BT adelanta 30° (330° de atraso). Muy usado en distribución.'},\n{k:'Yd1',h:1,p:'Y',s:'D1',w:0,t:'BT atrasa 30°.'},\n{k:'Yd11',h:11,p:'Y',s:'D2',w:0,t:'BT adelanta 30° (330° de atraso).'},\n{k:'Dd0',h:0,p:'D1',s:'D1',w:0,t:'Sin desfase.'},\n{k:'Dd6',h:6,p:'D1',s:'D1',w:1,t:'Bobinas de BT invertidas: BT en oposición.'}\n];\nvar AT='var(--at)', BT='var(--bt)', SEC='var(--text-secondary)';\nfunction T(x,y,s,sz,w,c,a){return '\u003ctext x=\"'+x+'\" y=\"'+y+'\" text-anchor=\"'+(a||'middle')+'\" font-size=\"'+sz+'\" font-weight=\"'+w+'\" fill=\"'+c+'\"\u003e'+s+'\u003c/text\u003e';}\nfunction L(x1,y1,x2,y2,c){return '\u003cline x1=\"'+x1+'\" y1=\"'+y1+'\" x2=\"'+x2+'\" y2=\"'+y2+'\" stroke=\"'+c+'\" stroke-width=\"2\" stroke-linecap=\"round\"/\u003e';}\nfunction D(x,y,c,r){return '\u003ccircle cx=\"'+x+'\" cy=\"'+y+'\" r=\"'+(r||3.5)+'\" fill=\"'+c+'\"/\u003e';}\nfunction pares(type,nm){\n  if(type==='Y')return [nm[0]+'–N',nm[1]+'–N',nm[2]+'–N'];\n  var s=type==='D1'?1:2;\n  return [0,1,2].map(function(a){return nm[a]+'–'+nm[(a+s)%3];});\n}\nfunction blk(yT,type,col,nm,sw,neutral){\n  var o='',y0=yT,cT=yT+10,cB=yT+50,yB=yT+60,P=pares(type,nm),off=type==='D1'?1:(type==='D2'?2:0);\n  for(var i=0;i\u003c3;i++){\n    var x=X[i],tl=nm[i],bl=type==='Y'?neutral:nm[(i+off)%3];\n    o+=L(x,y0,x,cT,col)+L(x,cB,x,yB,col);\n    o+='\u003crect x=\"'+(x-26)+'\" y=\"'+cT+'\" width=\"52\" height=\"40\" rx=\"4\" fill=\"var(--surface)\" stroke=\"'+col+'\" stroke-width=\"2\"/\u003e';\n    o+=T(x,cT+16,'FASE '+'ABC'.charAt(i),11,600,col)+T(x,cT+31,P[i],12,400,'var(--text-secondary)');\n    o+=D(x,y0,col)+D(x,yB,col);\n    o+=T(x+9,y0+4,tl,12,400,SEC,'start')+T(x+9,yB+4,bl,12,400,SEC,'start');\n  }\n  if(type==='Y'){\n    var by=yB+18;\n    for(var j=0;j\u003c3;j++){\n      o+=L(X[j],yB,X[j],by,col)+L(X[j],y0,X[j],y0-26,col);\n      o+=T(X[j],y0-32,nm[j],14,600,col);\n    }\n    o+=L(X[0],by,X[2],by,col)+D(190,by,col,4.5)+T(190,by+18,neutral,14,600,col);\n  }else{\n    var ch=[18,30,42];\n    for(var a=0;a\u003c3;a++){\n      var b,lane;\n      if(type==='D1'){b=(a+1)%3;lane=[130,250,22][a];}\n      else{b=(a+2)%3;lane=[358,130,250][a];}\n      var yc=yB+ch[type==='D1'?a:(a===0?2:a===1?0:1)];\n      var yj=y0-12;\n      o+='\u003cpolyline points=\"'+X[a]+','+yB+' '+X[a]+','+yc+' '+lane+','+yc+' '+lane+','+yj+' '+X[b]+','+yj+'\" fill=\"none\" stroke=\"'+col+'\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/\u003e';\n      o+=D(X[b],yj,col);\n    }\n    for(var k=0;k\u003c3;k++){o+=L(X[k],y0,X[k],y0-26,col)+T(X[k],y0-32,nm[k],14,600,col);}\n  }\n  return o;\n}\nfunction tx(type,nm){\n  var p=pares(type,nm);\n  return (type==='Y'?'estrella':'delta')+' (fase A '+p[0]+', fase B '+p[1]+', fase C '+p[2]+')';\n}\nfunction pt(cx,cy,r,hr){var a=hr*30*Math.PI/180;return [cx+r*Math.sin(a),cy-r*Math.cos(a)];}\nfunction drawWire(g){\n  var o='';\n  o+=T(190,16,'AT · primario · '+(g.p==='Y'?'estrella':'delta'),13,600,'var(--at-text)');\n  for(var n=0;n\u003c3;n++){o+='\u003crect x=\"'+(X[n]-3)+'\" y=\"80\" width=\"6\" height=\"215\" fill=\"var(--border)\"/\u003e';}\n  o+='\u003crect x=\"20\" y=\"177\" width=\"340\" height=\"18\" fill=\"var(--surface)\"/\u003e';\n  o+=T(190,190,'BT · secundario · '+(g.s==='Y'?'estrella':'delta')+(g.w?' · bobinas invertidas':''),13,600,'var(--bt-text)');\n  o+=blk(70,g.p,AT,['U','V','W'],0,'N');\n  o+=blk(245,g.s,BT,['X','Y','Z'],g.w,'N');\n  var s=document.getElementById('wire');\n  s.setAttribute('aria-label','Cableado del grupo '+g.k);\n  s.innerHTML=o;\n}\nfunction drawClock(g){\n  var cx=190,cy=125,r=92,o='';\n  o+='\u003ccircle cx=\"'+cx+'\" cy=\"'+cy+'\" r=\"'+r+'\" fill=\"var(--surface-1)\" stroke=\"var(--border-strong)\" stroke-width=\"1\"/\u003e';\n  for(var h=1;h\u003c=12;h++){\n    var a=pt(cx,cy,r-6,h),b=pt(cx,cy,r,h),t=pt(cx,cy,r+15,h),hl=(h%12===g.h%12);\n    o+='\u003cline x1=\"'+a[0]+'\" y1=\"'+a[1]+'\" x2=\"'+b[0]+'\" y2=\"'+b[1]+'\" stroke=\"var(--border-strong)\" stroke-width=\"1.5\"/\u003e';\n    o+=T(t[0],t[1]+5,h,hl?16:12,hl?600:400,hl?'var(--bt-text)':'var(--text-muted)');\n  }\n  var e1=pt(cx,cy,80,0),e2=pt(cx,cy,64,g.h);\n  o+=L(cx,cy,e1[0],e1[1],AT).replace('stroke-width=\"2\"','stroke-width=\"4\"');\n  if(g.h!==0){\n    var s1=pt(cx,cy,30,0),s2=pt(cx,cy,30,g.h);\n    o+='\u003cpath d=\"M'+s1[0]+' '+s1[1]+' A30 30 0 '+(g.h\u003e6?1:0)+' 1 '+s2[0]+' '+s2[1]+'\" fill=\"none\" stroke=\"var(--text-muted)\" stroke-width=\"1.5\" stroke-dasharray=\"3 3\"/\u003e';\n  }\n  o+=L(cx,cy,e2[0],e2[1],BT).replace('stroke-width=\"2\"','stroke-width=\"4\"');\n  o+=D(cx,cy,'var(--text-primary)',5);\n  var s=document.getElementById('clock');\n  s.setAttribute('aria-label','Reloj: grupo '+g.k+', hora '+(g.h===0?12:g.h));\n  s.innerHTML=o;\n}\nvar G1=[\n{k:'Ii0',h:0,sw:0,t:'Polaridad sustractiva: H1 y X1 quedan del mismo lado y no hay desfase.'},\n{k:'Ii6',h:6,sw:1,t:'Polaridad aditiva: H1 y X1 quedan en lados opuestos y el desfase es de 180°.'}\n];\nvar TR={tipo:'3',fases:3,v1:13200,v2:220,nom:'Trifásico',neutroH2:false};\nvar CUR=G,IDX=4,POL=null;\nfunction el(id){return document.getElementById(id);}\nfunction pnum(id){\n  var t=String(el(id).value==null?\"\":el(id).value).trim().replace(/\\s/g,\"\");\n  if(!t)return NaN;\n  if(t.indexOf(\",\")\u003e=0)return parseFloat(t.replace(\",\",\".\"));\n  var p=t.split(\".\");\n  if(p.length\u003e2)return parseFloat(p.join(\"\"));\n  if(p.length===2&&p[1].length===3&&p[0].length\u003c=3)return parseFloat(p.join(\"\"));\n  return parseFloat(t);\n}\nfunction hl(i){var bs=document.querySelectorAll('#btns button');for(var m=0;m\u003cbs.length;m++){bs[m].setAttribute('aria-pressed',m===i?'true':'false');}}\nvar LIGHT={'--at':'#c4492a','--at-text':'#8f3318','--bt':'#0f7a5c','--bt-text':'#0a5a43','--surface':'#ffffff','--surface-1':'#efede7','--text-primary':'#1d1d1b','--text-secondary':'#5c5b56','--text-muted':'#8d8b84','--border':'#d9d6cc','--border-strong':'#b9b6aa'};\nfunction figSvg(id){return el(id).outerHTML.replace(/var\\((--[\\w-]+)\\)/g,function(m,n){return LIGHT[n]||'#000';});}\nfunction exportFigs(){window.__figs={wire:figSvg('wire'),clock:figSvg('clock')};}\nfunction announce(g){try{if(window.parent&&window.parent!==window&&window.parent.setGrupo)window.parent.setGrupo(g);}catch(e){}}\nfunction drawTri(i){\n  var g=G[i];\n  drawWire(g); drawClock(g);\n  var ang=(g.h*30)%360;\n  var at=tx(g.p,['U','V','W']),bt=tx(g.s,['X','Y','Z'])+(g.w?' con bobinas invertidas (principio y fin intercambiados)':'');\n  el('info').innerHTML='\u003cdiv class=\"t\"\u003e'+g.k+' · hora '+(g.h===0?12:g.h)+' · '+ang+'° de atraso\u003c/div\u003e\u003cdiv class=\"d\"\u003eAT: '+at+'\u003cbr\u003eBT: '+bt+'\u003cbr\u003e'+g.t+'\u003c/div\u003e';\n  hl(i);exportFigs();\n  try{localStorage.setItem('grupo',String(i));}catch(e){}\n  announce({k:g.k,fases:3,p:g.p==='Y'?'Y':'D',s:g.s==='Y'?'Y':'D',h:g.h});\n  window.__resumen='Índice horario: '+g.k+' (hora '+(g.h===0?12:g.h)+', '+ang+'° de atraso)\\nAT: '+at+'\\nBT: '+bt+'\\nResultado: REGISTRADO';\n  var PP=pares(g.p,['U','V','W']),PS=pares(g.s,['X','Y','Z']);\n  window.__datos={tablas:[{titulo:'Grupo de conexión',cols:['Grupo','Hora','Desfase','AT','BT'],filas:[[g.k,String(g.h===0?12:g.h),ang+'°',(g.p==='Y'?'Estrella':'Delta'),(g.s==='Y'?'Estrella':'Delta')+(g.w?' (bobinas invertidas)':'')]]},{titulo:'Terminales por fase',cols:['Devanado','Fase A','Fase B','Fase C'],filas:[['AT',PP[0],PP[1],PP[2]],['BT',PS[0],PS[1],PS[2]]]}]};\n}\nfunction drawWire1(g){\n  var x=190,o='';\n  o+=T(190,16,'Monofásico · '+TR.nom,13,600,'var(--text-secondary)');\n  o+='\u003crect x=\"'+(x-3)+'\" y=\"72\" width=\"6\" height=\"220\" fill=\"var(--border)\"/\u003e';\n  function coil(y0,col,top,bot){\n    var cT=y0+10,cB=y0+60,yB=y0+70,s='';\n    s+=L(x,y0-22,x,cT,col)+L(x,cB,x,yB+22,col);\n    s+='\u003crect x=\"'+(x-22)+'\" y=\"'+cT+'\" width=\"44\" height=\"50\" rx=\"5\" fill=\"var(--surface)\" stroke=\"'+col+'\" stroke-width=\"2\"/\u003e';\n    s+=D(x,y0,col)+D(x,yB,col);\n    s+=T(x,y0-30,top,14,600,col)+T(x,yB+40,bot,14,600,col);\n    return s;\n  }\n  o+=coil(62,AT,'H1',TR.neutroH2?'H2 (a tierra)':'H2');\n  o+=coil(222,BT,g.sw?'X2':'X1',g.sw?'X1':'X2');\n  function ring(y){return '\u003ccircle cx=\"'+x+'\" cy=\"'+y+'\" r=\"8\" fill=\"none\" stroke=\"var(--text-primary)\" stroke-width=\"2\"/\u003e';}\n  o+=ring(62)+ring(g.sw?292:222);\n  o+=T(190,356,'◯ = terminal de polaridad (H1 y X1)',12,400,'var(--text-secondary)');\n  var s=el('wire');\n  s.setAttribute('aria-label','Cableado monofásico, polaridad '+(g.sw?'aditiva':'sustractiva'));\n  s.innerHTML=o;\n}\nfunction drawSingle(i){\n  var g=G1[i];\n  drawWire1(g); drawClock(g);\n  var ang=(g.h*30)%360,pol=g.sw?'aditiva':'sustractiva';\n  var extra=POL?'\u003cbr\u003ePrueba con voltímetro: '+POL.pv+' V aplicados, lectura '+POL.pr+' V → '+(POL.add?'aditiva':'sustractiva')+'.':'';\n  el('info').innerHTML='\u003cdiv class=\"t\"\u003e'+g.k+' · '+pol+' · '+ang+'° de atraso\u003c/div\u003e\u003cdiv class=\"d\"\u003eAT: devanado H1–H2'+(TR.neutroH2?' (H2 a tierra)':'')+'\u003cbr\u003eBT: devanado X1–X2\u003cbr\u003e'+g.t+extra+'\u003c/div\u003e';\n  hl(i);exportFigs();\n  try{localStorage.setItem('grupo1_'+TR.tipo,String(i));}catch(e){}\n  announce({k:g.k,fases:1});\n  window.__resumen='Transformador monofásico ('+TR.nom+')\\nPolaridad: '+g.k+' ('+pol+', '+ang+'° de atraso)'+(POL?'\\nPrueba con voltímetro: '+POL.pv+' V aplicados en AT, lectura H2–X2 '+POL.pr+' V → '+(POL.add?'aditiva':'sustractiva'):'')+'\\nResultado: REGISTRADO';\n  window.__datos={tablas:[{titulo:'Polaridad',cols:['Transformador','Polaridad','Grupo','Desfase','Prueba con voltímetro'],filas:[[TR.nom,pol,g.k,ang+'°',POL?(POL.pv+' V aplicados, '+POL.pr+' V leídos → '+(POL.add?'aditiva':'sustractiva')):'—']]}]};\n}\nfunction draw(i){IDX=i;if(TR.fases===1)drawSingle(i);else drawTri(i);}\nfunction buildBtns(){\n  var B=el('btns');B.innerHTML='';\n  B.style.gridTemplateColumns='repeat('+(CUR.length\u003e3?3:CUR.length)+',minmax(0,1fr))';\n  CUR.forEach(function(g,i){\n    var b=document.createElement('button');\n    b.type='button';\n    b.textContent=g.k+(CUR===G1?(g.sw?' · aditiva':' · sustractiva'):'');\n    b.setAttribute('aria-pressed','false');\n    b.onclick=function(){draw(i)};\n    B.appendChild(b);\n  });\n}\nfunction polCalc(auto){\n  var pv=pnum('pv'),pr=pnum('pr'),pa=pnum('pa'),pb=pnum('pb'),box=el('polres');\n  var a=pa/pb;\n  POL=null;\n  if(!(pv\u003e0)||!(a\u003e1)){box.innerHTML='\u003cspan class=\"mut\"\u003eIngresa la tensión aplicada y las tensiones nominales.\u003c/span\u003e';return;}\n  var add=pv*(1+1/a),sub=pv*(1-1/a),h='Si es aditiva debe leer ≈ '+add.toFixed(2)+' V. Si es sustractiva, ≈ '+sub.toFixed(2)+' V.';\n  if(pr\u003e0){\n    var isAdd=pr\u003epv,dist=Math.min(Math.abs(pr-add),Math.abs(pr-sub));\n    POL={pv:pv,pr:pr,add:isAdd};\n    h+='\u003cbr\u003e\u003cb\u003eResultado: polaridad '+(isAdd?'aditiva (Ii6)':'sustractiva (Ii0)')+'.\u003c/b\u003e';\n    if(dist\u003eMath.max(0.5*pv/a,0.3))h+='\u003cbr\u003e\u003cspan class=\"bad\"\u003eLa lectura se aleja de lo esperado. Revisa el puente H1–X1 y las tensiones nominales.\u003c/span\u003e';\n    if(auto&&TR.fases===1)draw(isAdd?1:0);\n  }\n  box.innerHTML=h;\n}\nfunction setTrafo(t){\n  TR=t;POL=null;\n  CUR=t.fases===1?G1:G;\n  el('ttl').textContent=t.fases===1?'Transformador monofásico':'Transformadores trifásicos';\n  el('sub1').textContent=t.fases===1?'Toca la polaridad para ver su conexión y su reloj.':'Toca un grupo de conexión para ver su cableado y su reloj.';\n  el('pol').style.display=t.fases===1?'block':'none';\n  el('pa').value=t.v1;el('pb').value=t.v2;el('pr').value='';\n  if(!el('pv').value)el('pv').value='120';\n  buildBtns();\n  var st=t.fases===1?(t.tipo==='M7'?1:0):4;\n  try{var sv=parseInt(localStorage.getItem(t.fases===1?'grupo1_'+t.tipo:'grupo'),10);if(sv\u003e=0&&sv\u003cCUR.length)st=sv;}catch(e){}\n  polCalc(false);\n  draw(st);\n  if(window.obsLoad)obsLoad();\n}\nvar t0=null;\ntry{t0=window.parent&&window.parent!==window?window.parent.TRAFO:null;}catch(e){}\n['pv','pr','pa','pb'].forEach(function(id){el(id).addEventListener('input',function(){polCalc(true);});});\nsetTrafo(t0||TR);\n\u003c/script\u003e\n\u003c/body\u003e\n\u003c/html\u003e\n",T:"\u003c!DOCTYPE html\u003e\n\u003chtml lang=\"es\"\u003e\n\u003chead\u003e\n\u003cmeta charset=\"utf-8\"\u003e\n\u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\"\u003e\n\u003ctitle\u003ePlantilla TTR y prueba con tensión de red\u003c/title\u003e\n\u003cstyle\u003e\n:root{\n  --bg:#f6f5f1; --surface:#ffffff; --surface-1:#efede7;\n  --tp:#1d1d1b; --ts:#5c5b56; --tm:#8d8b84;\n  --border:#d9d6cc; --bs:#b9b6aa; --accent:#0f7a5c;\n  --ok:#1b7f4b; --ok-bg:#dff3e6; --bad:#b3261e; --bad-bg:#fbe3e0; --none-bg:#e8e6df; --warn-bg:#fdf0d5; --warn:#7a4b00;\n  --font:system-ui,-apple-system,\"Segoe UI\",Roboto,\"Helvetica Neue\",Arial,sans-serif;\n}\n@media (prefers-color-scheme: dark){\n  :root{\n    --bg:#161614; --surface:#1f1f1c; --surface-1:#2a2a26;\n    --tp:#f1efe8; --ts:#b5b2a7; --tm:#85837a;\n    --border:#3a3a35; --bs:#58574f; --accent:#4cc9a2;\n    --ok:#6fdca4; --ok-bg:#16382a; --bad:#ff9a8c; --bad-bg:#4a201b; --none-bg:#2f2f2a; --warn-bg:#40320f; --warn:#f2c46b;\n  }\n}\n*{box-sizing:border-box}\nhtml{-webkit-text-size-adjust:100%}\nbody{margin:0;background:var(--bg);color:var(--tp);font-family:var(--font);line-height:1.45;\n  padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}\nmain{max-width:520px;margin:0 auto;padding:18px 14px 48px}\nh1{font-size:22px;font-weight:600;margin:0 0 4px;letter-spacing:-0.01em}\n.sub{margin:0 0 14px;color:var(--ts);font-size:14px}\n.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin:0 0 12px}\n.card h2{font-size:15px;font-weight:600;margin:0 0 10px;color:var(--ts)}\n.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}\n.full{grid-column:1/-1}\nlabel{display:block;font-size:12px;color:var(--ts);margin:0 0 3px}\ninput,select{font:inherit;font-size:16px;width:100%;min-height:44px;padding:8px 10px;border:1px solid var(--bs);\n  border-radius:9px;background:var(--bg);color:var(--tp)}\ninput:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:1px}\n#sum{position:sticky;top:0;z-index:5;margin:0 0 12px;padding:12px 14px;border-radius:14px;border:1px solid var(--border);background:var(--surface)}\n#sum .big{font-size:17px;font-weight:600}\n#sum .small{font-size:13px;color:var(--ts);margin-top:2px}\n#sum.ok{background:var(--ok-bg);border-color:var(--ok)} #sum.ok .big{color:var(--ok)}\n#sum.bad{background:var(--bad-bg);border-color:var(--bad)} #sum.bad .big{color:var(--bad)}\n#sum.warn{background:var(--warn-bg);border-color:var(--warn)} #sum.warn .big{color:var(--warn)}\n.warn{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:13px;margin:0 0 12px}\n.warn p{margin:2px 0}\n.pos .head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:0 0 8px}\n.pos .head b{font-size:16px}\n.pos .head span{font-size:13px;color:var(--ts)}\n.nom{font-size:11px;font-weight:600;background:var(--accent);color:var(--bg);border-radius:6px;padding:1px 6px;margin-left:6px}\n.th,.ap{margin:0 0 8px}\n.exp{font-size:13px;color:var(--ts);margin:-2px 0 8px}\n.exp.w{color:var(--warn)}\n.ph{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}\n.ph input{padding:8px 6px;text-align:center}\n.err{font-size:13px;font-weight:600;text-align:center;border-radius:7px;padding:3px 0;margin-top:4px;background:var(--none-bg);color:var(--tm)}\n.err small{display:block;font-size:11px;font-weight:400}\n.err.ok{background:var(--ok-bg);color:var(--ok)}\n.err.bad{background:var(--bad-bg);color:var(--bad)}\n.btns{display:flex;gap:8px;flex-wrap:wrap}\nbutton{font:inherit;font-size:15px;font-weight:500;min-height:44px;padding:8px 14px;border-radius:10px;border:1px solid var(--bs);background:var(--surface);color:var(--tp);cursor:pointer}\n.note{font-size:12.5px;color:var(--tm);margin:10px 2px 0}\n.hint{font-size:13px;margin-top:6px;color:var(--bad)}\ntextarea{width:100%;height:130px;font:12px monospace;margin-top:8px;display:none;background:var(--bg);color:var(--tp);border:1px solid var(--bs);border-radius:8px}\n#redf{display:none}\n\u003c/style\u003e\n\u003c/head\u003e\n\u003cbody\u003e\n\u003cmain\u003e\n  \u003ch1\u003ePlantilla TTR y prueba con red\u003c/h1\u003e\n  \u003cp class=\"sub\"\u003eVerifica la relación de transformación con un TTR o, si no tienes uno, con tensión de red y un voltímetro.\u003c/p\u003e\n\n  \u003cdiv id=\"sum\" role=\"status\" aria-live=\"polite\"\u003e\u003c/div\u003e\n  \u003cdiv id=\"warn\" class=\"warn\" style=\"display:none\" role=\"alert\"\u003e\u003c/div\u003e\n\n  \u003csection class=\"card\"\u003e\n    \u003ch2\u003eMétodo de prueba\u003c/h2\u003e\n    \u003cdiv class=\"g2\"\u003e\n      \u003cdiv class=\"full\"\u003e\u003clabel for=\"mode\"\u003eMétodo\u003c/label\u003e\n        \u003cselect id=\"mode\"\u003e\u003coption value=\"T\"\u003eCon TTR (relación de espiras)\u003c/option\u003e\u003coption value=\"R\"\u003eSin TTR: tensión de red y voltímetro\u003c/option\u003e\u003c/select\u003e\u003c/div\u003e\n      \u003cdiv class=\"full\"\u003e\u003clabel for=\"vexc\" id=\"vexcL\"\u003eTensión de prueba del TTR (V, opcional)\u003c/label\u003e\n        \u003cinput id=\"vexc\" type=\"text\" inputmode=\"decimal\" placeholder=\"Ej. 8 o 220\"\u003e\u003c/div\u003e\n      \u003cdiv id=\"redf\" class=\"g2 full\"\u003e\n        \u003cdiv\u003e\u003clabel for=\"eside\"\u003eLado que energizas\u003c/label\u003e\n          \u003cselect id=\"eside\"\u003e\u003coption value=\"A\"\u003eAT (alta)\u003c/option\u003e\u003coption value=\"B\"\u003eBT (baja)\u003c/option\u003e\u003c/select\u003e\u003c/div\u003e\n        \u003cdiv id=\"etypewrap\"\u003e\u003clabel for=\"etype\"\u003eTipo de excitación\u003c/label\u003e\n          \u003cselect id=\"etype\"\u003e\u003coption value=\"3\"\u003eTrifásica\u003c/option\u003e\u003coption value=\"M\"\u003eMonofásica\u003c/option\u003e\u003c/select\u003e\u003c/div\u003e\n      \u003c/div\u003e\n    \u003c/div\u003e\n    \u003cp class=\"note\" id=\"mnote\"\u003e\u003c/p\u003e\n  \u003c/section\u003e\n\n  \u003csection class=\"card\"\u003e\n    \u003ch2\u003eDatos del transformador\u003c/h2\u003e\n    \u003cdiv class=\"g2\"\u003e\n      \u003cdiv\u003e\u003clabel for=\"v1\"\u003eTensión AT nominal (V)\u003c/label\u003e\u003cinput id=\"v1\" type=\"text\" inputmode=\"decimal\" value=\"440\"\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"v2\"\u003eTensión BT nominal (V)\u003c/label\u003e\u003cinput id=\"v2\" type=\"text\" inputmode=\"decimal\" value=\"220\"\u003e\u003c/div\u003e\n      \u003cdiv id=\"cawrap\"\u003e\u003clabel for=\"ca\"\u003eConexión AT\u003c/label\u003e\u003cselect id=\"ca\"\u003e\u003coption value=\"Y\"\u003eEstrella (Y)\u003c/option\u003e\u003coption value=\"D\"\u003eDelta (D)\u003c/option\u003e\u003c/select\u003e\u003c/div\u003e\n      \u003cdiv id=\"cbwrap\"\u003e\u003clabel for=\"cb\"\u003eConexión BT\u003c/label\u003e\u003cselect id=\"cb\"\u003e\u003coption value=\"Y\"\u003eEstrella (y)\u003c/option\u003e\u003coption value=\"D\"\u003eDelta (d)\u003c/option\u003e\u003c/select\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"n\"\u003eNúmero de posiciones\u003c/label\u003e\u003cinput id=\"n\" type=\"text\" inputmode=\"numeric\" value=\"5\"\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"nom\"\u003ePosición nominal\u003c/label\u003e\u003cinput id=\"nom\" type=\"text\" inputmode=\"numeric\" value=\"3\"\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"step\"\u003ePaso por posición (%)\u003c/label\u003e\u003cinput id=\"step\" type=\"text\" inputmode=\"decimal\" value=\"2.5\"\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"side\"\u003eEl tap está en\u003c/label\u003e\u003cselect id=\"side\"\u003e\u003coption value=\"P\"\u003ePrimario (AT)\u003c/option\u003e\u003coption value=\"S\"\u003eSecundario (BT)\u003c/option\u003e\u003c/select\u003e\u003c/div\u003e\n      \u003cdiv class=\"full\"\u003e\u003clabel for=\"tol\"\u003eTolerancia de error (± %)\u003c/label\u003e\u003cinput id=\"tol\" type=\"text\" inputmode=\"decimal\" value=\"0.5\"\u003e\u003c/div\u003e\n    \u003c/div\u003e\n    \u003cp class=\"note\"\u003eLa posición 1 es la de más espiras en el devanado con tap (tensión mayor).\u003c/p\u003e\n  \u003c/section\u003e\n\n  \u003cdiv id=\"pos\"\u003e\u003c/div\u003e\n\n  \u003csection class=\"card\"\u003e\n    \u003cdiv class=\"btns\"\u003e\n      \u003cbutton type=\"button\" id=\"copy\"\u003eCopiar resumen\u003c/button\u003e\n      \u003cbutton type=\"button\" id=\"clear\"\u003eBorrar mediciones\u003c/button\u003e\n    \u003c/div\u003e\n    \u003ctextarea id=\"ta\" readonly aria-label=\"Resumen\"\u003e\u003c/textarea\u003e\n  \u003c/section\u003e\n\n  \u003cp class=\"note\"\u003eTolerancia habitual: ±0,5 % (IEC 60076-1, IEEE C57.12.00). Verifica la que aplica a tu equipo. Los datos quedan guardados en este navegador.\u003c/p\u003e\n\u003cstyle\u003e\n.obsb{background:var(--surface,#fff);border:1px solid var(--border,#d9d6cc);border-radius:14px;padding:14px;margin:12px 0 0}\n.obsb h2{font-size:15px;font-weight:600;margin:0 0 10px;color:var(--ts,var(--text-secondary,#5c5b56))}\n.obsb textarea{display:block;width:100%;height:90px;margin:0;font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--bs,#b9b6aa);border-radius:9px;background:var(--bg,#f6f5f1);color:var(--tp,#1d1d1b);resize:vertical}\n\u003c/style\u003e\n\u003csection class=\"obsb\" id=\"obsBox\"\u003e\n  \u003ch2\u003eObservaciones\u003c/h2\u003e\n  \u003ctextarea id=\"obsText\" placeholder=\"Observaciones de esta prueba (opcional)\"\u003e\u003c/textarea\u003e\n\u003c/section\u003e\n\u003cscript\u003e\n(function(){\n  var ta=document.getElementById(\"obsText\");\n  function key(){return \"ttr2_obs_\"+(typeof TIPO===\"string\"?TIPO:\"3\");}\n  window.__obs=\"\";\n  window.obsLoad=function(){\n    var v=\"\";\n    try{v=localStorage.getItem(key())||\"\";}catch(e){}\n    ta.value=v;window.__obs=v;\n  };\n  ta.addEventListener(\"input\",function(){\n    window.__obs=ta.value;\n    try{localStorage.setItem(key(),ta.value);}catch(e){}\n  });\n})();\n\u003c/script\u003e\n\u003cstyle\u003e\n.fotos{background:var(--surface,#fff);border:1px solid var(--border,#d9d6cc);border-radius:14px;padding:14px;margin:12px 0 0}\n.fotos h2{font-size:15px;font-weight:600;margin:0 0 10px;color:var(--ts,var(--text-secondary,#5c5b56))}\n.fotos .frow{display:flex;gap:8px;flex-wrap:wrap}\n.fotos .fbtn{flex:1 1 40%;display:flex;align-items:center;justify-content:center;min-height:48px;padding:8px 12px;border-radius:10px;border:1px solid var(--bs,var(--border-strong,#b9b6aa));background:var(--bg,#f6f5f1);color:var(--tp,var(--text-primary,#1d1d1b));font:inherit;font-size:15px;font-weight:600;cursor:pointer;margin:0}\n.fotos .fgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}\n.fotos .fth{position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--border,#d9d6cc);aspect-ratio:1/1;background:#fff}\n.fotos .fth img{width:100%;height:100%;object-fit:cover;display:block}\n.fotos .fth button{position:absolute;top:4px;right:4px;width:30px;height:30px;border-radius:15px;border:0;background:rgba(0,0,0,.65);color:#fff;font-size:18px;line-height:1;cursor:pointer;padding:0}\n.fotos .nt{font-size:12.5px;color:var(--tm,var(--text-muted,#8d8b84));margin:10px 2px 0}\n\u003c/style\u003e\n\u003csection class=\"fotos\" id=\"fotosBox\"\u003e\n  \u003ch2\u003eFotos de la prueba\u003c/h2\u003e\n  \u003cdiv class=\"frow\"\u003e\n    \u003clabel class=\"fbtn\"\u003eTomar foto\u003cinput id=\"fotoCam\" type=\"file\" accept=\"image/*\" capture=\"environment\" hidden\u003e\u003c/label\u003e\n    \u003clabel class=\"fbtn\"\u003eGalería\u003cinput id=\"fotoGal\" type=\"file\" accept=\"image/*\" multiple hidden\u003e\u003c/label\u003e\n  \u003c/div\u003e\n  \u003cdiv id=\"fotoGrid\" class=\"fgrid\"\u003e\u003c/div\u003e\n  \u003cp class=\"nt\" id=\"fotoN\"\u003e\u003c/p\u003e\n  \u003cp class=\"nt\"\u003eLas fotos se guardan solo cuando guardas el informe en este dispositivo.\u003c/p\u003e\n\u003c/section\u003e\n\u003cscript\u003e\n(function(){\n  var fotos=window.__fotos=[];window.__setFotos=function(a){fotos.length=0;(a||[]).forEach(function(x){fotos.push(x);});draw();};\n  var box=document.getElementById(\"fotoGrid\"),nt=document.getElementById(\"fotoN\");\n  function draw(){\n    box.innerHTML=\"\";\n    fotos.forEach(function(src,i){\n      var d=document.createElement(\"div\");d.className=\"fth\";\n      var im=document.createElement(\"img\");im.src=src;im.alt=\"Foto \"+(i+1);\n      var b=document.createElement(\"button\");b.type=\"button\";b.textContent=\"×\";b.setAttribute(\"aria-label\",\"Quitar foto \"+(i+1));\n      b.onclick=function(){fotos.splice(i,1);draw();};\n      d.appendChild(im);d.appendChild(b);box.appendChild(d);\n    });\n    nt.textContent=fotos.length?fotos.length+(fotos.length===1?\" foto lista\":\" fotos listas\")+\" para el informe\":\"Sin fotos\";\n  }\n  function add(file){\n    var rd=new FileReader();\n    rd.onload=function(){\n      var img=new Image();\n      img.onload=function(){\n        var sc=Math.min(1,1000/Math.max(img.width,img.height)),c=document.createElement(\"canvas\");\n        c.width=Math.max(1,Math.round(img.width*sc));c.height=Math.max(1,Math.round(img.height*sc));\n        c.getContext(\"2d\").drawImage(img,0,0,c.width,c.height);\n        fotos.push(c.toDataURL(\"image/jpeg\",0.72));draw();\n      };\n      img.src=rd.result;\n    };\n    rd.readAsDataURL(file);\n  }\n  [\"fotoCam\",\"fotoGal\"].forEach(function(id){\n    document.getElementById(id).addEventListener(\"change\",function(e){\n      var fs=e.target.files;for(var i=0;i\u003cfs.length;i++)add(fs[i]);e.target.value=\"\";\n    });\n  });\n  draw();\n})();\n\u003c/script\u003e\n\u003c/main\u003e\n\n\u003cscript\u003e\nvar S={meas:{},vm:{},app:{},ovr:{}};\nvar TIPO=\"3\",NF=3;\nvar SQ3=Math.sqrt(3);\nvar IDS=['mode','vexc','eside','etype','v1','v2','ca','cb','n','nom','step','side','tol'];\nfunction $(id){return document.getElementById(id);}\nfunction parse(s){\n  var t=String(s==null?\"\":s).trim().replace(/\\s/g,\"\");\n  if(!t)return NaN;\n  if(t.indexOf(\",\")\u003e=0&&t.indexOf(\".\")\u003e=0){\n    if(t.lastIndexOf(\",\")\u003et.lastIndexOf(\".\"))t=t.replace(/\\./g,\"\").replace(/,/g,\".\");\n    else t=t.replace(/,/g,\"\");\n  }else if(t.indexOf(\",\")\u003e=0){t=t.replace(\",\",\".\");}\n  var v=parseFloat(t.replace(/[^0-9.\\-+eE]/g,\"\"));\n  return isFinite(v)?v:NaN;\n}\nfunction parseMiles(s){\n  var t=String(s==null?\"\":s).trim().replace(/\\s/g,\"\");\n  if(!t)return NaN;\n  if(t.indexOf(\",\")\u003e=0)return parse(t);\n  var p=t.split(\".\");\n  if(p.length\u003e2)return parseFloat(p.join(\"\"));\n  if(p.length===2&&p[1].length===3&&p[0].length\u003c=3)return parseFloat(p.join(\"\"));\n  return parseFloat(t);\n}\nfunction numV(id){return parseMiles($(id).value);}\nfunction num(id){return parse($(id).value);}\nfunction fmt(x,d){return isFinite(x)?x.toFixed(d):\"—\";}\nfunction sg(e){return (e\u003e0?\"+\":\"\")+fmt(e,2)+\" %\";}\nfunction st(b){return {t:b?\"FALLA\":\"OK\",c:b?\"bad\":\"ok\"};}\nfunction ph(v,c){return c===\"Y\"?v/SQ3:v;}\nfunction params(){\n  var n=Math.round(num(\"n\"));if(!(n\u003e=1))n=1;if(n\u003e17)n=17;\n  var nom=Math.round(num(\"nom\"));if(!(nom\u003e=1))nom=1;if(nom\u003en)nom=n;\n  var step=num(\"step\");if(!isFinite(step))step=0;\n  var tol=num(\"tol\");if(!(tol\u003e=0))tol=0.5;\n  return {mode:$(\"mode\").value,vexc:numV(\"vexc\"),eside:$(\"eside\").value,etype:$(\"etype\").value,\n    v1:numV(\"v1\"),v2:numV(\"v2\"),ca:$(\"ca\").value,cb:$(\"cb\").value,n:n,nom:nom,step:step,side:$(\"side\").value,tol:tol};\n}\nfunction volts(p,P){\n  var f=1+(P.nom-p)*P.step/100;\n  return {a:P.v1*(P.side===\"P\"?f:1),b:P.v2*(P.side===\"S\"?f:1)};\n}\nfunction theo(p,P){\n  var v=volts(p,P);\n  return (P.mode===\"T\"&&NF===3)?ph(v.a,P.ca)/ph(v.b,P.cb):v.a/v.b;\n}\nfunction appVal(p,P){\n  var a=S.app[p];\n  if(a!==undefined&&String(a).trim()!==\"\")return parseMiles(a);\n  return P.vexc;\n}\nvar FT=[\"A\",\"B\",\"C\"],FR=[\"A–B\",\"B–C\",\"C–A\"];\n\nfunction labels(){\n  var m=$(\"mode\").value;\n  $(\"vexcL\").textContent=m===\"T\"?\"Tensión de prueba del TTR (V, opcional)\":\"Tensión de red aplicada (V)\";\n  $(\"redf\").style.display=m===\"R\"?\"grid\":\"none\";\n  $(\"mnote\").textContent=m===\"T\"\n    ?(NF===3?\"Ingresa la relación que indica el TTR en cada fase. El TTR mide relación de espiras por fase; por eso en estrella se usa la tensión de línea entre √3.\":\"Ingresa la relación que indica el TTR. En un transformador monofásico la relación es la tensión AT entre la tensión BT.\")\n    :(NF===3?\"Aplica la tensión de red al lado elegido y mide con el voltímetro o la pinza voltimétrica, entre fases, el otro lado. La relación sale de la tensión aplicada entre la medida, en tensión de línea. Con tensión de red trifásica el resultado es válido para cualquier conexión.\":\"Aplica una tensión reducida al lado elegido y mide con el voltímetro el otro lado. La relación sale de la tensión aplicada entre la medida.\");\n}\nfunction warnings(P){\n  var w=[];\n  if(P.mode===\"R\"){\n    var Vn=P.eside===\"A\"?P.v1:P.v2;\n    if(isFinite(P.vexc)&&isFinite(Vn)&&P.vexc\u003eVn*1.02)w.push(\"La tensión aplicada supera la nominal del lado energizado. No energices un devanado por encima de su tensión nominal.\");\n    var out=P.eside===\"A\"?P.vexc*P.v2/P.v1:P.vexc*P.v1/P.v2;\n    if(isFinite(out)&&out\u003e150)w.push(\"El otro lado quedará con unos \"+fmt(out,0)+\" V. Usa puntas aisladas y no toques los bornes.\");\n    if(NF===3&&P.etype===\"M\"&&P.ca!==P.cb)w.push(\"La excitación monofásica solo es confiable si ambos lados tienen la misma conexión (Yy o Dd). Con conexiones distintas usa excitación trifásica.\");\n  }\n  var el=$(\"warn\");\n  if(w.length){el.style.display=\"block\";el.innerHTML=w.map(function(t){return \"\u003cp\u003e⚠ \"+t+\"\u003c/p\u003e\";}).join(\"\");}\n  else{el.style.display=\"none\";el.innerHTML=\"\";}\n}\n\nfunction build(){\n  S.ovr={};\n  labels();\n  var P=params(),h=\"\",R=P.mode===\"R\";\n  for(var p=1;p\u003c=P.n;p++){\n    var v=volts(p,P);\n    h+='\u003csection class=\"card pos\"\u003e\u003cdiv class=\"head\"\u003e\u003cdiv\u003e\u003cb\u003ePosición '+p+'\u003c/b\u003e'+(p===P.nom?'\u003cspan class=\"nom\"\u003enominal\u003c/span\u003e':\"\")+'\u003c/div\u003e\u003cspan\u003e'+fmt(v.a,1)+\" / \"+fmt(v.b,1)+' V\u003c/span\u003e\u003c/div\u003e';\n    h+='\u003cdiv class=\"th\"\u003e\u003clabel for=\"th'+p+'\"\u003eRelación teórica'+(R?\" (de línea)\":\"\")+'\u003c/label\u003e\u003cinput id=\"th'+p+'\" class=\"thi\" data-p=\"'+p+'\" type=\"text\" inputmode=\"decimal\" value=\"'+fmt(theo(p,P),4)+'\"\u003e\u003c/div\u003e';\n    if(R){\n      var av=S.app[p]!==undefined?S.app[p]:(isFinite(P.vexc)?String(P.vexc):\"\");\n      h+='\u003cdiv class=\"ap\"\u003e\u003clabel for=\"ap'+p+'\"\u003eTensión aplicada en el lado '+(P.eside===\"A\"?\"AT\":\"BT\")+' (V)\u003c/label\u003e\u003cinput id=\"ap'+p+'\" class=\"api\" data-p=\"'+p+'\" type=\"text\" inputmode=\"decimal\" value=\"'+av+'\"\u003e\u003c/div\u003e';\n      h+='\u003cdiv class=\"exp\" id=\"x'+p+'\"\u003e\u003c/div\u003e';\n    }\n    h+='\u003cdiv class=\"ph\" style=\"grid-template-columns:repeat('+NF+',minmax(0,1fr))\"\u003e';\n    for(var f=0;f\u003cNF;f++){\n      var k=p+\"-\"+f,store=R?S.vm:S.meas,val=store[k]!==undefined?store[k]:\"\";\n      h+='\u003cdiv\u003e\u003clabel for=\"m'+k+'\"\u003e'+(R?\"V \"+(P.eside===\"A\"?\"BT\":\"AT\")+(NF===3?\" \"+FR[f]:\"\"):(NF===3?\"Fase \"+FT[f]:\"Lectura TTR\"))+'\u003c/label\u003e\u003cinput id=\"m'+k+'\" class=\"mi\" data-k=\"'+k+'\" type=\"text\" inputmode=\"decimal\" placeholder=\"'+(R?\"Volts\":\"TTR\")+'\" value=\"'+val+'\"\u003e\u003cdiv class=\"err\" id=\"e'+k+'\"\u003e—\u003c/div\u003e\u003c/div\u003e';\n    }\n    h+=\"\u003c/div\u003e\u003c/section\u003e\";\n  }\n  $(\"pos\").innerHTML=h;\n  var ms=document.querySelectorAll(\".mi\");\n  for(var i=0;i\u003cms.length;i++){ms[i].addEventListener(\"input\",function(e){(params().mode===\"R\"?S.vm:S.meas)[e.target.dataset.k]=e.target.value;update();});}\n  var ts=document.querySelectorAll(\".thi\");\n  for(var j=0;j\u003cts.length;j++){ts[j].addEventListener(\"input\",function(e){S.ovr[e.target.dataset.p]=parse(e.target.value);update();});}\n  var as=document.querySelectorAll(\".api\");\n  for(var q=0;q\u003cas.length;q++){as[q].addEventListener(\"input\",function(e){S.app[e.target.dataset.p]=e.target.value;update();});}\n  update();\n}\n\nfunction update(){\n  var P=params(),R=P.mode===\"R\",total=0,fails=[],worst=0,ratios=[],lines=[],tbl=[];\n  warnings(P);\n  for(var p=1;p\u003c=P.n;p++){\n    var t=S.ovr[p]!==undefined?S.ovr[p]:theo(p,P);\n    var app=R?appVal(p,P):NaN;\n    var line=\"Pos \"+p+(p===P.nom?\" (nom)\":\"\")+\" teórica \"+fmt(t,4)+(R?\" · aplicado \"+fmt(app,1)+\" V\":\"\")+\":\";\n    if(R){\n      var xe=$(\"x\"+p),vv=volts(p,P),Vw=P.eside===\"A\"?vv.a:vv.b,exp=P.eside===\"A\"?app/t:app*t;\n      if(isFinite(exp)&&isFinite(app)){\n        var over=app\u003eVw*1.02;\n        xe.className=\"exp\"+(over?\" w\":\"\");\n        xe.textContent=\"Debe medir ≈ \"+fmt(exp,1)+\" V en el lado \"+(P.eside===\"A\"?\"BT\":\"AT\")+(over?\" · ⚠ aplicado mayor que la tensión del devanado\":\"\");\n      }else{xe.className=\"exp\";xe.textContent=\"Ingresa la tensión aplicada para ver el valor esperado.\";}\n    }\n    var prow=[];\n    for(var f=0;f\u003cNF;f++){\n      var k=p+\"-\"+f,raw=(R?S.vm:S.meas)[k],x=(R?parseMiles(raw===undefined?\"\":raw):parse(raw===undefined?\"\":raw)),el=$(\"e\"+k);\n      var empty=!(raw!==undefined&&String(raw).trim()!==\"\")||!isFinite(x);\n      var m=x;\n      if(R&&!empty){m=P.eside===\"A\"?app/x:x/app;}\n      if(empty||!isFinite(m)||!isFinite(t)||t===0||(R&&(!isFinite(app)||app\u003c=0||x\u003c=0))){el.className=\"err\";el.textContent=\"—\";continue;}\n      var err=(m-t)/t*100,bad=Math.abs(err)\u003eP.tol;\n      total++;\n      if(Math.abs(err)\u003eworst)worst=Math.abs(err);\n      if(bad){fails.push(\"Pos \"+p+(NF===3?\" \"+(R?FR[f]:\"fase \"+FT[f]):\"\"));ratios.push(m/t);}\n      el.className=\"err \"+(bad?\"bad\":\"ok\");\n      prow.push({f:f,x:x,m:m,err:err,bad:bad});\n      el.innerHTML=(err\u003e0?\"+\":\"\")+fmt(err,2)+\" %\"+(R?\"\u003csmall\u003erel \"+fmt(m,4)+\"\u003c/small\u003e\":\"\");\n      line+=\" \"+(NF===3?(R?FR[f]:FT[f]):\"lectura\")+\" \"+(R?fmt(x,1)+\" V → rel \"+fmt(m,4):fmt(m,4))+\" (\"+(err\u003e0?\"+\":\"\")+fmt(err,2)+\"%\"+(bad?\" FALLA\":\"\")+\")\";\n    }\n    if(line.slice(-1)!==\":\")lines.push(line);\n    if(prow.length)tbl.push({p:p,t:t,app:app,rows:prow});\n  }\n  var s=$(\"sum\"),cls=\"\",big,small;\n  if(total===0){big=\"Sin mediciones\";small=R?\"Ingresa la tensión aplicada y las tensiones medidas.\":\"Ingresa lo que marca el TTR en cada fase.\";}\n  else if(fails.length){\n    cls=\"warn\";big=fails.length+\" de \"+total+\" lecturas fuera de tolerancia\";\n    small=\"Error máximo \"+fmt(worst,2)+\" % (tolerancia ±\"+fmt(P.tol,2)+\" %). \"+fails.slice(0,4).join(\", \")+(fails.length\u003e4?\"…\":\"\");\n    var allS=ratios.every(function(r){return Math.abs(r-SQ3)/SQ3\u003c0.02;}),allI=ratios.every(function(r){return Math.abs(r-1/SQ3)*SQ3\u003c0.02;});\n    if(NF===3&&(allS||allI)){\n      small+='\u003cdiv class=\"hint\"\u003e'+(R?\"Las lecturas difieren por un factor √3. ¿Mediste fase-neutro en vez de fase-fase?\":\"Las lecturas difieren de la teórica por un factor √3. Revisa si configuraste bien estrella o delta.\")+\"\u003c/div\u003e\";\n    }else if(R&&ratios.every(function(r){return Math.abs(r*r-1)\u003c0.04&&Math.abs(r-1)\u003e0.02;})){\n      small+='\u003cdiv class=\"hint\"\u003eLas lecturas parecen invertidas. Revisa que el lado energizado sea el que elegiste.\u003c/div\u003e';\n    }\n  }else{\n    cls=\"ok\";big=\"Todas las lecturas dentro de tolerancia\";\n    small=\"Error máximo \"+fmt(worst,2)+\" % (tolerancia ±\"+fmt(P.tol,2)+\" %).\";\n  }\n  s.className=cls;s.innerHTML='\u003cdiv class=\"big\"\u003e'+big+'\u003c/div\u003e\u003cdiv class=\"small\"\u003e'+small+\"\u003c/div\u003e\";\n  var head=\"Método: \"+(R?\"tensión de red \"+fmt(P.vexc,1)+\" V (\"+(NF===3&&P.etype===\"3\"?\"trifásica\":\"monofásica\")+\") aplicada en \"+(P.eside===\"A\"?\"AT\":\"BT\"):\"TTR\"+(isFinite(P.vexc)?\" a \"+fmt(P.vexc,1)+\" V\":\"\"))+\"\\n\";\n  head+=fmt(P.v1,0)+\"/\"+fmt(P.v2,0)+\" V\"+(NF===3?\" · AT \"+P.ca+\" / BT \"+P.cb:\" · monofásico\")+\" · tolerancia ±\"+fmt(P.tol,2)+\" %\\n\";\n  window.__resumen=head+lines.join(\"\\n\")+\"\\nResultado: \"+(total===0?\"sin mediciones\":fails.length?\"FUERA DE TOLERANCIA (\"+fails.length+\")\":\"APROBADO\");\n  var cols,filas=[];\n  function pl(q){return String(q.p)+(q.p===P.nom?\" (nom)\":\"\");}\n  if(NF===1){\n    cols=R?[\"Pos\",\"Teórica\",\"V aplicada\",\"V medida\",\"Relación\",\"Error\",\"Estado\"]:[\"Pos\",\"Teórica\",\"Lectura\",\"Error\",\"Estado\"];\n    tbl.forEach(function(q){q.rows.forEach(function(z){filas.push(R?[pl(q),fmt(q.t,4),fmt(q.app,1)+\" V\",fmt(z.x,3)+\" V\",fmt(z.m,4),sg(z.err),st(z.bad)]:[pl(q),fmt(q.t,4),fmt(z.m,4),sg(z.err),st(z.bad)]);});});\n  }else if(!R){\n    cols=[\"Pos\",\"Teórica\",\"Fase A\",\"Error A\",\"Fase B\",\"Error B\",\"Fase C\",\"Error C\",\"Estado\"];\n    tbl.forEach(function(q){var row=[pl(q),fmt(q.t,4)],bad=false;for(var f2=0;f2\u003c3;f2++){var z=null;q.rows.forEach(function(y){if(y.f===f2)z=y;});row.push(z?fmt(z.m,4):\"—\",z?sg(z.err):\"—\");if(z&&z.bad)bad=true;}row.push(st(bad));filas.push(row);});\n  }else{\n    cols=[\"Pos\",\"Teórica\",\"V aplicada\",\"Terminales\",\"V medida\",\"Relación\",\"Error\",\"Estado\"];\n    tbl.forEach(function(q){q.rows.forEach(function(z){filas.push([pl(q),fmt(q.t,4),fmt(q.app,1)+\" V\",FR[z.f],fmt(z.x,3)+\" V\",fmt(z.m,4),sg(z.err),st(z.bad)]);});});\n  }\n  var cond=[R?\"Tensión de red\":\"TTR\",isFinite(P.vexc)?fmt(P.vexc,1)+\" V\":\"—\",fmt(P.v1,0)+\" / \"+fmt(P.v2,0)+\" V\",NF===3?\"AT \"+(P.ca===\"Y\"?\"estrella\":\"delta\")+\" / BT \"+(P.cb===\"Y\"?\"estrella\":\"delta\"):\"Monofásico\",\"±\"+fmt(P.tol,2)+\" %\"];\n  window.__datos={tablas:[{titulo:\"Condiciones\",cols:[\"Método\",\"Tensión aplicada\",\"Tensiones nominales\",\"Conexión\",\"Tolerancia\"],filas:[cond]},{titulo:\"Resultados por posición\",cols:cols,filas:filas}]};\n  save();\n}\n\nfunction save(){\n  try{\n    var f={};IDS.forEach(function(id){f[id]=$(id).value;});\n    localStorage.setItem(\"ttr2_\"+TIPO,JSON.stringify({f:f,meas:S.meas,vm:S.vm,app:S.app}));\n  }catch(e){}\n}\nfunction load(){\n  try{\n    var d=JSON.parse(localStorage.getItem(\"ttr2_\"+TIPO)||\"null\");\n    if(d){for(var id in d.f){if($(id))$(id).value=d.f[id];}S.meas=d.meas||{};S.vm=d.vm||{};S.app=d.app||{};}\n  }catch(e){}\n}\n\nIDS.forEach(function(id){\n  if(id===\"vexc\"){\n    var h=function(){S.app={};build();};\n    $(id).addEventListener(\"input\",h);$(id).addEventListener(\"change\",h);\n  }else{\n    $(id).addEventListener(\"input\",build);$(id).addEventListener(\"change\",build);\n  }\n});\n$(\"clear\").addEventListener(\"click\",function(){S.meas={};S.vm={};S.app={};build();});\n$(\"copy\").addEventListener(\"click\",function(){\n  var txt=window.__resumen||\"\",ta=$(\"ta\"),b=$(\"copy\");\n  function manual(){ta.style.display=\"block\";ta.value=txt;ta.focus();ta.select();b.textContent=\"Selecciona y copia\";}\n  try{\n    navigator.clipboard.writeText(txt).then(function(){b.textContent=\"Copiado\";setTimeout(function(){b.textContent=\"Copiar resumen\";},1500);},manual);\n  }catch(e){manual();}\n});\nvar DEF={};IDS.forEach(function(id){DEF[id]=$(id).value;});\nfunction setTrafo(t,first){\n  if(!first)save();\n  TIPO=t.tipo;NF=t.fases;\n  S.meas={};S.vm={};S.app={};S.ovr={};\n  IDS.forEach(function(id){$(id).value=DEF[id];});\n  $(\"v1\").value=t.v1;$(\"v2\").value=t.v2;\n  if(NF===3){$(\"ca\").value=t.ca||\"D\";$(\"cb\").value=t.cb||\"Y\";}\n  load();\n  if(NF===3&&t.grupo&&t.grupo.fases===3){$(\"ca\").value=t.grupo.p;$(\"cb\").value=t.grupo.s;}\n  $(\"cawrap\").style.display=NF===3?\"block\":\"none\";\n  $(\"cbwrap\").style.display=NF===3?\"block\":\"none\";\n  $(\"etypewrap\").style.display=NF===3?\"block\":\"none\";\n  build();\n  if(window.obsLoad)obsLoad();\n}\nfunction setGrupo(g){\n  if(NF!==3||!g||g.fases!==3)return;\n  $(\"ca\").value=g.p;$(\"cb\").value=g.s;\n  build();\n}\nvar t0=null;\ntry{t0=window.parent&&window.parent!==window?window.parent.TRAFO:null;}catch(e){}\nsetTrafo(t0||{tipo:\"3\",fases:3,v1:13200,v2:220,ca:\"D\",cb:\"Y\"},true);\n\u003c/script\u003e\n\u003c/body\u003e\n\u003c/html\u003e\n",A:"\u003c!DOCTYPE html\u003e\n\u003chtml lang=\"es\"\u003e\n\u003chead\u003e\n\u003cmeta charset=\"utf-8\"\u003e\n\u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\"\u003e\n\u003ctitle\u003eResistencia de aislamiento\u003c/title\u003e\n\u003cstyle\u003e\n:root{\n  --bg:#f6f5f1; --surface:#ffffff; --surface-1:#efede7;\n  --tp:#1d1d1b; --ts:#5c5b56; --tm:#8d8b84;\n  --border:#d9d6cc; --bs:#b9b6aa; --accent:#0f7a5c;\n  --ok:#1b7f4b; --ok-bg:#dff3e6; --bad:#b3261e; --bad-bg:#fbe3e0; --none-bg:#e8e6df; --warn-bg:#fdf0d5; --warn:#7a4b00;\n  --font:system-ui,-apple-system,\"Segoe UI\",Roboto,\"Helvetica Neue\",Arial,sans-serif;\n}\n@media (prefers-color-scheme: dark){\n  :root{\n    --bg:#161614; --surface:#1f1f1c; --surface-1:#2a2a26;\n    --tp:#f1efe8; --ts:#b5b2a7; --tm:#85837a;\n    --border:#3a3a35; --bs:#58574f; --accent:#4cc9a2;\n    --ok:#6fdca4; --ok-bg:#16382a; --bad:#ff9a8c; --bad-bg:#4a201b; --none-bg:#2f2f2a; --warn-bg:#40320f; --warn:#f2c46b;\n  }\n}\n*{box-sizing:border-box}\nhtml{-webkit-text-size-adjust:100%}\nbody{margin:0;background:var(--bg);color:var(--tp);font-family:var(--font);line-height:1.45;\n  padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}\nmain{max-width:520px;margin:0 auto;padding:18px 14px 48px}\nh1{font-size:22px;font-weight:600;margin:0 0 4px;letter-spacing:-0.01em}\n.sub{margin:0 0 14px;color:var(--ts);font-size:14px}\n.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin:0 0 12px}\n.card h2{font-size:15px;font-weight:600;margin:0 0 10px;color:var(--ts)}\n.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}\n.full{grid-column:1/-1}\nlabel{display:block;font-size:12px;color:var(--ts);margin:0 0 3px}\ninput,select{font:inherit;font-size:16px;width:100%;min-height:44px;padding:8px 10px;border:1px solid var(--bs);\n  border-radius:9px;background:var(--bg);color:var(--tp)}\ninput:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:1px}\n#sum{position:sticky;top:0;z-index:5;margin:0 0 12px;padding:12px 14px;border-radius:14px;border:1px solid var(--border);background:var(--surface)}\n#sum .big{font-size:17px;font-weight:600}\n#sum .small{font-size:13px;color:var(--ts);margin-top:2px}\n#sum.ok{background:var(--ok-bg);border-color:var(--ok)} #sum.ok .big{color:var(--ok)}\n#sum.bad{background:var(--bad-bg);border-color:var(--bad)} #sum.bad .big{color:var(--bad)}\n#sum.warn{background:var(--warn-bg);border-color:var(--warn)} #sum.warn .big{color:var(--warn)}\n.head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:0 0 10px}\n.head b{font-size:17px}\n.head span{font-size:12px;color:var(--ts);text-align:right}\n.rd{margin-top:10px}\n.res{margin-top:12px;font-size:14px}\n.res .kv{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--border)}\n.res .kv:first-child{border-top:0}\n.res .kv span{color:var(--ts)}\n.chip{font-size:12px;font-weight:600;border-radius:7px;padding:2px 8px;white-space:nowrap;background:var(--none-bg);color:var(--tm)}\n.chip.ok{background:var(--ok-bg);color:var(--ok)}\n.chip.bad{background:var(--bad-bg);color:var(--bad)}\n.mut{color:var(--tm);font-size:13px}\n.btns{display:flex;gap:8px;flex-wrap:wrap}\nbutton{font:inherit;font-size:15px;font-weight:500;min-height:44px;padding:8px 14px;border-radius:10px;border:1px solid var(--bs);background:var(--surface);color:var(--tp);cursor:pointer}\n.note{font-size:12.5px;color:var(--tm);margin:10px 2px 0}\n.warnbox{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:13px;margin:0 0 12px}\ntextarea{width:100%;height:150px;font:12px monospace;margin-top:8px;display:none;background:var(--bg);color:var(--tp);border:1px solid var(--bs);border-radius:8px}\n.dic{margin-top:12px;padding-top:12px;border-top:1px dashed var(--bs)}\n.dic .dbs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 8px}\n.dbtn{min-height:46px;font-weight:600}\n.dbtn[aria-pressed=\"true\"][data-v=\"A\"]{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}\n.dbtn[aria-pressed=\"true\"][data-v=\"F\"]{background:var(--bad-bg);color:var(--bad);border-color:var(--bad)}\n.dic textarea.com{display:block;height:70px;margin-top:0;font:inherit;font-size:15px;padding:8px 10px}\n#sum.pend{background:var(--warn-bg);border-color:var(--warn)}\n\u003c/style\u003e\n\u003c/head\u003e\n\u003cbody\u003e\n\u003cmain\u003e\n  \u003ch1\u003eResistencia de aislamiento\u003c/h1\u003e\n  \u003cp class=\"sub\"\u003ePrueba con megóhmetro. El programa calcula si cumple la resistencia mínima y el DAR, el PI o la caída máxima. El dictamen final (Aprobado o Falla) lo elige el técnico en cada prueba.\u003c/p\u003e\n\n  \u003cdiv id=\"sum\" role=\"status\" aria-live=\"polite\"\u003e\u003c/div\u003e\n  \u003cdiv id=\"warn\" class=\"warnbox\" style=\"display:none\" role=\"alert\"\u003e\u003c/div\u003e\n\n  \u003csection class=\"card\"\u003e\n    \u003ch2\u003eDatos de la prueba\u003c/h2\u003e\n    \u003cdiv class=\"g2\"\u003e\n      \u003cdiv class=\"full\"\u003e\u003clabel for=\"prueba\"\u003eTipo de prueba\u003c/label\u003e\n        \u003cselect id=\"prueba\"\u003e\n          \u003coption value=\"P\"\u003ePuntual (1 min)\u003c/option\u003e\n          \u003coption value=\"D\"\u003eDAR (30 s y 1 min)\u003c/option\u003e\n          \u003coption value=\"I\"\u003ePI (1 min y 10 min)\u003c/option\u003e\n          \u003coption value=\"E\"\u003eEscalonada (por pasos de tensión)\u003c/option\u003e\n          \u003coption value=\"R\"\u003eRampa (tensión creciente)\u003c/option\u003e\n        \u003c/select\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"unit\"\u003eUnidad de las lecturas\u003c/label\u003e\u003cselect id=\"unit\"\u003e\u003coption value=\"0.001\"\u003ekΩ\u003c/option\u003e\u003coption value=\"1\" selected\u003eMΩ\u003c/option\u003e\u003coption value=\"1000\"\u003eGΩ\u003c/option\u003e\u003c/select\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"tipo\"\u003eAislamiento\u003c/label\u003e\u003cselect id=\"tipo\"\u003e\u003coption value=\"A\"\u003eAceite\u003c/option\u003e\u003coption value=\"S\"\u003eSeco\u003c/option\u003e\u003c/select\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"v1\"\u003eTensión AT (V)\u003c/label\u003e\u003cinput id=\"v1\" type=\"text\" inputmode=\"decimal\" value=\"13200\"\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"v2\"\u003eTensión BT (V)\u003c/label\u003e\u003cinput id=\"v2\" type=\"text\" inputmode=\"decimal\" value=\"220\"\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"temp\"\u003eTemperatura (°C)\u003c/label\u003e\u003cinput id=\"temp\" type=\"text\" inputmode=\"decimal\" value=\"20\"\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"crit\"\u003eCriterio de resistencia mínima\u003c/label\u003e\u003cselect id=\"crit\"\u003e\u003coption value=\"F\"\u003eValor fijo\u003c/option\u003e\u003coption value=\"N\"\u003eNETA (tabla 100.5)\u003c/option\u003e\u003coption value=\"K\"\u003e1 MΩ por kV + 1\u003c/option\u003e\u003c/select\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"rmin\"\u003eResistencia mínima (GΩ)\u003c/label\u003e\u003cinput id=\"rmin\" type=\"text\" inputmode=\"decimal\" value=\"1\"\u003e\u003c/div\u003e\n      \u003cdiv id=\"dwrap\"\u003e\u003clabel for=\"dmin\"\u003eDAR mínimo\u003c/label\u003e\u003cinput id=\"dmin\" type=\"text\" inputmode=\"decimal\" value=\"1\"\u003e\u003c/div\u003e\n      \u003cdiv id=\"pwrap\"\u003e\u003clabel for=\"cls\"\u003eClase térmica (PI)\u003c/label\u003e\u003cselect id=\"cls\"\u003e\u003coption value=\"A\"\u003eA (PI mín 1,5)\u003c/option\u003e\u003coption value=\"B\"\u003eB, F o H (PI mín 2)\u003c/option\u003e\u003c/select\u003e\u003clabel for=\"pmin\"\u003ePI mínimo\u003c/label\u003e\u003cinput id=\"pmin\" type=\"text\" inputmode=\"decimal\" value=\"1.5\"\u003e\u003c/div\u003e\n      \u003cdiv id=\"dropwrap\"\u003e\u003clabel for=\"drop\"\u003eCaída máxima entre pasos (%)\u003c/label\u003e\u003cinput id=\"drop\" type=\"text\" inputmode=\"decimal\" value=\"25\"\u003e\u003c/div\u003e\n    \u003c/div\u003e\n    \u003cp class=\"note\"\u003eMide con el transformador desenergizado y desconectado. Descarga los devanados antes y después de la prueba. La norma IEC 60076 no fija valores de resistencia, DAR ni PI. Los de partida son: resistencia 1 GΩ, DAR 1 (mínimo aceptable según el manual Megger), PI según clase térmica (1,5 clase A; 2 clases B, F y H) y caída del 25 %. Ajústalos al criterio del fabricante o de tu procedimiento.\u003c/p\u003e\n  \u003c/section\u003e\n\n  \u003cdiv id=\"rows\"\u003e\u003c/div\u003e\n\n  \u003csection class=\"card\"\u003e\n    \u003cdiv class=\"btns\"\u003e\n      \u003cbutton type=\"button\" id=\"copy\"\u003eCopiar resumen\u003c/button\u003e\n      \u003cbutton type=\"button\" id=\"clear\"\u003eBorrar mediciones\u003c/button\u003e\n    \u003c/div\u003e\n    \u003ctextarea id=\"ta\" readonly aria-label=\"Resumen\"\u003e\u003c/textarea\u003e\n  \u003c/section\u003e\n\n  \u003cp class=\"note\"\u003eCorrección a 20 °C: la resistencia se duplica cada 10 °C en aceite y aumenta unas 1,6 veces cada 10 °C en aislamiento seco. DAR = R 1 min / R 30 s. PI = R 10 min / R 1 min. Los datos quedan guardados en este navegador.\u003c/p\u003e\n\u003cstyle\u003e\n.obsb{background:var(--surface,#fff);border:1px solid var(--border,#d9d6cc);border-radius:14px;padding:14px;margin:12px 0 0}\n.obsb h2{font-size:15px;font-weight:600;margin:0 0 10px;color:var(--ts,var(--text-secondary,#5c5b56))}\n.obsb textarea{display:block;width:100%;height:90px;margin:0;font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--bs,#b9b6aa);border-radius:9px;background:var(--bg,#f6f5f1);color:var(--tp,#1d1d1b);resize:vertical}\n\u003c/style\u003e\n\u003csection class=\"obsb\" id=\"obsBox\"\u003e\n  \u003ch2\u003eObservaciones\u003c/h2\u003e\n  \u003ctextarea id=\"obsText\" placeholder=\"Observaciones de esta prueba (opcional)\"\u003e\u003c/textarea\u003e\n\u003c/section\u003e\n\u003cscript\u003e\n(function(){\n  var ta=document.getElementById(\"obsText\");\n  function key(){return \"aisl2_obs_\"+(typeof TIPO===\"string\"?TIPO:\"3\");}\n  window.__obs=\"\";\n  window.obsLoad=function(){\n    var v=\"\";\n    try{v=localStorage.getItem(key())||\"\";}catch(e){}\n    ta.value=v;window.__obs=v;\n  };\n  ta.addEventListener(\"input\",function(){\n    window.__obs=ta.value;\n    try{localStorage.setItem(key(),ta.value);}catch(e){}\n  });\n})();\n\u003c/script\u003e\n\u003cstyle\u003e\n.fotos{background:var(--surface,#fff);border:1px solid var(--border,#d9d6cc);border-radius:14px;padding:14px;margin:12px 0 0}\n.fotos h2{font-size:15px;font-weight:600;margin:0 0 10px;color:var(--ts,var(--text-secondary,#5c5b56))}\n.fotos .frow{display:flex;gap:8px;flex-wrap:wrap}\n.fotos .fbtn{flex:1 1 40%;display:flex;align-items:center;justify-content:center;min-height:48px;padding:8px 12px;border-radius:10px;border:1px solid var(--bs,var(--border-strong,#b9b6aa));background:var(--bg,#f6f5f1);color:var(--tp,var(--text-primary,#1d1d1b));font:inherit;font-size:15px;font-weight:600;cursor:pointer;margin:0}\n.fotos .fgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}\n.fotos .fth{position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--border,#d9d6cc);aspect-ratio:1/1;background:#fff}\n.fotos .fth img{width:100%;height:100%;object-fit:cover;display:block}\n.fotos .fth button{position:absolute;top:4px;right:4px;width:30px;height:30px;border-radius:15px;border:0;background:rgba(0,0,0,.65);color:#fff;font-size:18px;line-height:1;cursor:pointer;padding:0}\n.fotos .nt{font-size:12.5px;color:var(--tm,var(--text-muted,#8d8b84));margin:10px 2px 0}\n\u003c/style\u003e\n\u003csection class=\"fotos\" id=\"fotosBox\"\u003e\n  \u003ch2\u003eFotos de la prueba\u003c/h2\u003e\n  \u003cdiv class=\"frow\"\u003e\n    \u003clabel class=\"fbtn\"\u003eTomar foto\u003cinput id=\"fotoCam\" type=\"file\" accept=\"image/*\" capture=\"environment\" hidden\u003e\u003c/label\u003e\n    \u003clabel class=\"fbtn\"\u003eGalería\u003cinput id=\"fotoGal\" type=\"file\" accept=\"image/*\" multiple hidden\u003e\u003c/label\u003e\n  \u003c/div\u003e\n  \u003cdiv id=\"fotoGrid\" class=\"fgrid\"\u003e\u003c/div\u003e\n  \u003cp class=\"nt\" id=\"fotoN\"\u003e\u003c/p\u003e\n  \u003cp class=\"nt\"\u003eLas fotos se guardan solo cuando guardas el informe en este dispositivo.\u003c/p\u003e\n\u003c/section\u003e\n\u003cscript\u003e\n(function(){\n  var fotos=window.__fotos=[];window.__setFotos=function(a){fotos.length=0;(a||[]).forEach(function(x){fotos.push(x);});draw();};\n  var box=document.getElementById(\"fotoGrid\"),nt=document.getElementById(\"fotoN\");\n  function draw(){\n    box.innerHTML=\"\";\n    fotos.forEach(function(src,i){\n      var d=document.createElement(\"div\");d.className=\"fth\";\n      var im=document.createElement(\"img\");im.src=src;im.alt=\"Foto \"+(i+1);\n      var b=document.createElement(\"button\");b.type=\"button\";b.textContent=\"×\";b.setAttribute(\"aria-label\",\"Quitar foto \"+(i+1));\n      b.onclick=function(){fotos.splice(i,1);draw();};\n      d.appendChild(im);d.appendChild(b);box.appendChild(d);\n    });\n    nt.textContent=fotos.length?fotos.length+(fotos.length===1?\" foto lista\":\" fotos listas\")+\" para el informe\":\"Sin fotos\";\n  }\n  function add(file){\n    var rd=new FileReader();\n    rd.onload=function(){\n      var img=new Image();\n      img.onload=function(){\n        var sc=Math.min(1,1000/Math.max(img.width,img.height)),c=document.createElement(\"canvas\");\n        c.width=Math.max(1,Math.round(img.width*sc));c.height=Math.max(1,Math.round(img.height*sc));\n        c.getContext(\"2d\").drawImage(img,0,0,c.width,c.height);\n        fotos.push(c.toDataURL(\"image/jpeg\",0.72));draw();\n      };\n      img.src=rd.result;\n    };\n    rd.readAsDataURL(file);\n  }\n  [\"fotoCam\",\"fotoGal\"].forEach(function(id){\n    document.getElementById(id).addEventListener(\"change\",function(e){\n      var fs=e.target.files;for(var i=0;i\u003cfs.length;i++)add(fs[i]);e.target.value=\"\";\n    });\n  });\n  draw();\n})();\n\u003c/script\u003e\n\u003c/main\u003e\n\n\u003cscript\u003e\nvar S={v:{},tv:{},min:{},dic:{},com:{}};\nvar TIPO=\"3\";\nvar IDS=[\"prueba\",\"unit\",\"tipo\",\"v1\",\"v2\",\"temp\",\"crit\",\"rmin\",\"dmin\",\"pmin\",\"drop\",\"cls\"];\nvar TESTS=[{n:\"AT–BT\",w:\"M\"},{n:\"AT–T\",w:\"A\"},{n:\"BT–T\",w:\"B\"}];\nvar PN={P:\"Puntual 1 min\",D:\"DAR\",I:\"PI\",E:\"Escalonada\",R:\"Rampa\"};\nvar TVS=[500,1000,2500,5000,10000];\nfunction $(id){return document.getElementById(id);}\nfunction parse(s){\n  var t=String(s==null?\"\":s).trim().replace(/\\s/g,\"\");\n  if(!t)return NaN;\n  if(t.indexOf(\",\")\u003e=0&&t.indexOf(\".\")\u003e=0){\n    if(t.lastIndexOf(\",\")\u003et.lastIndexOf(\".\"))t=t.replace(/\\./g,\"\").replace(/,/g,\".\");\n    else t=t.replace(/,/g,\"\");\n  }else if(t.indexOf(\",\")\u003e=0){t=t.replace(\",\",\".\");}\n  var v=parseFloat(t.replace(/[^0-9.\\-+eE]/g,\"\"));\n  return isFinite(v)?v:NaN;\n}\nfunction parseMiles(s){\n  var t=String(s==null?\"\":s).trim().replace(/\\s/g,\"\");\n  if(!t)return NaN;\n  if(t.indexOf(\",\")\u003e=0)return parse(t);\n  var p=t.split(\".\");\n  if(p.length\u003e2)return parseFloat(p.join(\"\"));\n  if(p.length===2&&p[1].length===3&&p[0].length\u003c=3)return parseFloat(p.join(\"\"));\n  return parseFloat(t);\n}\nfunction numV(id){return parseMiles($(id).value);}\nfunction num(id){return parse($(id).value);}\nfunction params(){\n  return {u:parseFloat($(\"unit\").value)||1,tipo:$(\"tipo\").value,pr:$(\"prueba\").value,v1:numV(\"v1\"),v2:numV(\"v2\"),t:num(\"temp\"),\n    crit:$(\"crit\").value,rmin:num(\"rmin\"),dmin:num(\"dmin\"),pmin:num(\"pmin\"),drop:num(\"drop\")};\n}\nfunction uname(u){return u===0.001?\"kΩ\":(u===1000?\"GΩ\":\"MΩ\");}\nfunction vn(w,P){return w===\"A\"?P.v1:(w===\"B\"?P.v2:Math.max(P.v1,P.v2));}\nfunction netaMin(V,tipo){\n  if(V\u003c=600)return tipo===\"A\"?100:500;\n  if(V\u003c=5000)return tipo===\"A\"?1000:5000;\n  return tipo===\"A\"?5000:25000;\n}\nfunction netaTV(V){return V\u003c=600?1000:(V\u003c=5000?2500:5000);}\nfunction minFor(w,P){\n  if(P.crit===\"F\")return isFinite(P.rmin)?P.rmin*1000:NaN;\n  var V=vn(w,P);if(!(V\u003e0))return NaN;\n  return P.crit===\"K\"?V/1000+1:netaMin(V,P.tipo);\n}\nfunction tvFor(i,w,P){if(S.tv[i]!==undefined)return S.tv[i];var V=vn(w,P);return V\u003e0?netaTV(V):1000;}\nfunction fmtR(m){\n  if(!isFinite(m))return \"—\";\n  if(m\u003e=1000)return (m/1000).toFixed(2)+\" GΩ\";\n  if(m\u003c1)return (m*1000).toFixed(1)+\" kΩ\";\n  return m.toFixed(m\u003e=100?0:(m\u003e=10?1:2))+\" MΩ\";\n}\nfunction fmtG(mo){return isFinite(mo)?String(+(mo/1000).toFixed(3)):\"\";}\nfunction fmt(x,d){return isFinite(x)?x.toFixed(d):\"—\";}\nfunction chip(ok,t){return '\u003cspan class=\"chip '+(ok?\"ok\":\"bad\")+'\"\u003e'+t+\"\u003c/span\u003e\";}\nfunction ncols(P){return P.pr===\"D\"?[[\"30\",\"30 s\"],[\"60\",\"1 min\"]]:(P.pr===\"I\"?[[\"60\",\"1 min\"],[\"600\",\"10 min\"]]:[[\"60\",\"1 min\"]]);}\nfunction nsteps(P){return P.pr===\"E\"?5:6;}\nfunction isTab(P){return P.pr===\"E\"||P.pr===\"R\";}\nfunction stepV(i,k,P){\n  var raw=S.v[i+\"-v\"+k];\n  if(raw!==undefined&&String(raw).trim()!==\"\")return raw;\n  var t=TESTS[i];\n  return String(Math.round(tvFor(i,t.w,P)*(k+1)/nsteps(P)));\n}\nfunction vis(P){\n  $(\"dwrap\").style.display=P.pr===\"D\"?\"block\":\"none\";\n  $(\"pwrap\").style.display=P.pr===\"I\"?\"block\":\"none\";\n  $(\"dropwrap\").style.display=isTab(P)?\"block\":\"none\";\n}\n\nfunction esc(s){return String(s).replace(/&/g,\"&amp;\").replace(/\u003c/g,\"&lt;\").replace(/\u003e/g,\"&gt;\");}\nfunction build(){\n  S.min={};\n  var P=params(),h=\"\",un=uname(P.u),tab=isTab(P),ns=nsteps(P);\n  vis(P);\n  TESTS.forEach(function(t,i){\n    var tv=tvFor(i,t.w,P),mn=minFor(t.w,P),V=vn(t.w,P);\n    h+='\u003csection class=\"card\"\u003e\u003cdiv class=\"head\"\u003e\u003cb\u003e'+t.n+\"\u003c/b\u003e\u003cspan\u003e\"+(V\u003e0?fmt(V,0)+\" V nominal\":\"\")+\"\u003c/span\u003e\u003c/div\u003e\";\n    h+='\u003cdiv class=\"g2\"\u003e\u003cdiv\u003e\u003clabel for=\"tv'+i+'\"\u003eTensión de prueba (V)\u003c/label\u003e\u003cselect id=\"tv'+i+'\" class=\"tvs\" data-i=\"'+i+'\"\u003e';\n    TVS.forEach(function(x){h+='\u003coption value=\"'+x+'\"'+(x===tv?\" selected\":\"\")+\"\u003e\"+x+\"\u003c/option\u003e\";});\n    h+='\u003c/select\u003e\u003c/div\u003e\u003cdiv\u003e\u003clabel for=\"mn'+i+'\"\u003eResistencia mínima (GΩ)\u003c/label\u003e\u003cinput id=\"mn'+i+'\" class=\"mni\" data-i=\"'+i+'\" type=\"text\" inputmode=\"decimal\" value=\"'+fmtG(mn)+'\"\u003e\u003c/div\u003e\u003c/div\u003e';\n    if(!tab){\n      h+='\u003cdiv class=\"g2 rd\"\u003e';\n      ncols(P).forEach(function(c){\n        var k=i+\"-\"+c[0],val=S.v[k]!==undefined?S.v[k]:\"\";\n        h+='\u003cdiv\u003e\u003clabel for=\"m'+k+'\"\u003eLectura '+c[1]+\" (\"+un+')\u003c/label\u003e\u003cinput id=\"m'+k+'\" class=\"mi\" data-k=\"'+k+'\" type=\"text\" inputmode=\"decimal\" value=\"'+val+'\"\u003e\u003c/div\u003e';\n      });\n      h+=\"\u003c/div\u003e\";\n    }else{\n      for(var s=0;s\u003cns;s++){\n        var kv=i+\"-v\"+s,kr=i+\"-s\"+s,vr=S.v[kr]!==undefined?S.v[kr]:\"\";\n        h+='\u003cdiv class=\"g2 rd\"\u003e\u003cdiv\u003e\u003clabel for=\"m'+kv+'\"\u003e'+(P.pr===\"E\"?\"Paso \":\"Punto \")+(s+1)+' · tensión (V)\u003c/label\u003e\u003cinput id=\"m'+kv+'\" class=\"mi\" data-k=\"'+kv+'\" type=\"text\" inputmode=\"decimal\" value=\"'+stepV(i,s,P)+'\"\u003e\u003c/div\u003e';\n        h+='\u003cdiv\u003e\u003clabel for=\"m'+kr+'\"\u003eR 1 min ('+un+')\u003c/label\u003e\u003cinput id=\"m'+kr+'\" class=\"mi\" data-k=\"'+kr+'\" type=\"text\" inputmode=\"decimal\" value=\"'+vr+'\"\u003e\u003c/div\u003e\u003c/div\u003e';\n      }\n    }\n    h+='\u003cdiv class=\"res\" id=\"r'+i+'\"\u003e\u003c/div\u003e';\n    h+='\u003cdiv class=\"dic\"\u003e\u003clabel\u003eDictamen del técnico\u003c/label\u003e\u003cdiv class=\"dbs\"\u003e'+\n       '\u003cbutton type=\"button\" class=\"dbtn\" data-i=\"'+i+'\" data-v=\"A\" aria-pressed=\"'+(S.dic[i]===\"A\")+'\"\u003eAprobado\u003c/button\u003e'+\n       '\u003cbutton type=\"button\" class=\"dbtn\" data-i=\"'+i+'\" data-v=\"F\" aria-pressed=\"'+(S.dic[i]===\"F\")+'\"\u003eFalla\u003c/button\u003e\u003c/div\u003e'+\n       '\u003clabel for=\"com'+i+'\"\u003eComentarios\u003c/label\u003e\u003ctextarea id=\"com'+i+'\" class=\"com\" data-i=\"'+i+'\" placeholder=\"Observaciones de esta prueba\"\u003e'+esc(S.com[i]||\"\")+\"\u003c/textarea\u003e\u003c/div\u003e\u003c/section\u003e\";\n  });\n  $(\"rows\").innerHTML=h;\n  var a=document.querySelectorAll(\".mi\");\n  for(var j=0;j\u003ca.length;j++){a[j].addEventListener(\"input\",function(e){S.v[e.target.dataset.k]=e.target.value;update();});}\n  var b=document.querySelectorAll(\".tvs\");\n  for(var q=0;q\u003cb.length;q++){b[q].addEventListener(\"change\",function(e){S.tv[e.target.dataset.i]=parseInt(e.target.value,10);if(isTab(params()))build();else update();});}\n  var c=document.querySelectorAll(\".mni\");\n  for(var r=0;r\u003cc.length;r++){c[r].addEventListener(\"input\",function(e){S.min[e.target.dataset.i]=parse(e.target.value);update();});}\n  var d=document.querySelectorAll(\".dbtn\");\n  for(var m=0;m\u003cd.length;m++){d[m].addEventListener(\"click\",function(e){\n    var i=e.currentTarget.dataset.i,v=e.currentTarget.dataset.v;\n    if(S.dic[i]===v)delete S.dic[i];else S.dic[i]=v;\n    var bs=document.querySelectorAll('.dbtn[data-i=\"'+i+'\"]');\n    for(var z=0;z\u003cbs.length;z++){bs[z].setAttribute(\"aria-pressed\",S.dic[i]===bs[z].dataset.v?\"true\":\"false\");}\n    update();\n  });}\n  var cm=document.querySelectorAll(\".com\");\n  for(var n2=0;n2\u003ccm.length;n2++){cm[n2].addEventListener(\"input\",function(e){S.com[e.target.dataset.i]=e.target.value;update();});}\n  update();\n}\n\nfunction update(){\n  var P=params(),un=uname(P.u),tab=isTab(P),ns=nsteps(P),base=P.tipo===\"A\"?2:1.584;\n  var K=isFinite(P.t)?Math.pow(base,(P.t-20)/10):1,w=[];\n  if(!isFinite(P.t))w.push(\"Sin temperatura: las lecturas no se corrigen a 20 °C.\");\n  if(P.pr===\"D\"&&isFinite(P.dmin)&&P.dmin\u003c1.1)w.push(\"DAR mínimo muy bajo (\"+fmt(P.dmin,2)+\"): casi cualquier lectura cumple. Revisa el criterio del procedimiento.\");\nif(P.pr===\"R\")w.push(\"Velocidad normal de la rampa: 1 kV/min (referencia Megger). Si tu procedimiento usa otra, anótala en observaciones.\");\n  var lines=[],mainRows=[],stepTabs=[],sumRows=[],dictRows=[],done=0,nDic=0,nF=0,pend=0,calcFails=0;\n  function dtxt(i){return S.dic[i]===\"A\"?\"APROBADO\":(S.dic[i]===\"F\"?\"FALLA\":\"Pendiente\");}\n  function dcell(i){return S.dic[i]===\"A\"?{t:\"APROBADO\",c:\"ok\"}:(S.dic[i]===\"F\"?{t:\"FALLA\",c:\"bad\"}:{t:\"Pendiente\",c:\"\"});}\n  TESTS.forEach(function(t,i){\n    var el=$(\"r\"+i);\n    function g(c){var raw=S.v[i+\"-\"+c],x=parse(raw===undefined?\"\":raw);return isFinite(x)&&x\u003e0?x*P.u:NaN;}\n    var mnMO=S.min[i]!==undefined?S.min[i]*1000:minFor(t.w,P),tv=tvFor(i,t.w,P);\n    var h=\"\",ln=t.n+\" · \"+PN[P.pr]+\" · \"+tv+\" V: \",ok1=false,ok2=true,complete=false,calc={t:\"—\",c:\"\"};\n    if(!tab){\n      var r30=g(\"30\"),r60=g(\"60\"),r600=g(\"600\");\n      var miss=!isFinite(r60)||(P.pr===\"D\"&&!isFinite(r30))||(P.pr===\"I\"&&!isFinite(r600));\n      if(miss){h='\u003cdiv class=\"mut\"\u003eFaltan lecturas.\u003c/div\u003e';}\n      else{\n        complete=true;\n        var r60c=r60*K,row=[t.n,tv+\" V\"];\n        ok1=!isFinite(mnMO)||r60c\u003e=mnMO;\n        if(P.pr===\"D\"){h+='\u003cdiv class=\"kv\"\u003e\u003cspan\u003eR 30 s\u003c/span\u003e\u003cb\u003e'+fmtR(r30)+\"\u003c/b\u003e\u003c/div\u003e\";row.push(fmtR(r30));}\n        h+='\u003cdiv class=\"kv\"\u003e\u003cspan\u003eR 1 min\u003c/span\u003e\u003cb\u003e'+fmtR(r60)+\"\u003c/b\u003e\u003c/div\u003e\";row.push(fmtR(r60));\n        if(P.pr===\"I\"){h+='\u003cdiv class=\"kv\"\u003e\u003cspan\u003eR 10 min\u003c/span\u003e\u003cb\u003e'+fmtR(r600)+\"\u003c/b\u003e\u003c/div\u003e\";row.push(fmtR(r600));}\n        h+='\u003cdiv class=\"kv\"\u003e\u003cspan\u003eR 1 min a 20 °C\u003c/span\u003e\u003cb\u003e'+fmtR(r60c)+\"\u003c/b\u003e\"+chip(ok1,(ok1?\"cumple\":\"bajo\")+\" mín \"+fmtR(mnMO))+\"\u003c/div\u003e\";\n        row.push(fmtR(r60c),fmtR(mnMO));\n        ln+=(P.pr===\"D\"?\"R30 = \"+fmtR(r30)+\"; \":\"\")+\"R1min = \"+fmtR(r60)+\"; \"+(P.pr===\"I\"?\"R10min = \"+fmtR(r600)+\"; \":\"\")+\"R1min a 20 °C = \"+fmtR(r60c)+\" (mín \"+fmtR(mnMO)+\": \"+(ok1?\"cumple\":\"NO cumple\")+\")\";\n        if(P.pr===\"D\"){\n          var dar=r60/r30;ok2=dar\u003e=P.dmin;\n          h+='\u003cdiv class=\"kv\"\u003e\u003cspan\u003eDAR (1 min / 30 s)\u003c/span\u003e\u003cb\u003e'+fmt(dar,2)+\"\u003c/b\u003e\"+chip(ok2,(ok2?\"cumple\":\"bajo\")+\" mín \"+fmt(P.dmin,2))+\"\u003c/div\u003e\";\n          ln+=\"; DAR = \"+fmt(dar,2)+\" (mín \"+fmt(P.dmin,2)+\": \"+(ok2?\"cumple\":\"NO cumple\")+\")\";\n          row.push(fmt(dar,2),fmt(P.dmin,2));\n        }\n        if(P.pr===\"I\"){\n          var pi=r600/r60;ok2=pi\u003e=P.pmin;if(r60\u003e5000)h+='\u003cdiv\u003eAviso: IR de 1 min mayor a 5000 MΩ. El PI puede no indicar la condición del aislamiento (IEEE 43).\u003c/div\u003e';\n          h+='\u003cdiv class=\"kv\"\u003e\u003cspan\u003ePI (10 min / 1 min)\u003c/span\u003e\u003cb\u003e'+fmt(pi,2)+\"\u003c/b\u003e\"+chip(ok2,(ok2?\"cumple\":\"bajo\")+\" mín \"+fmt(P.pmin,2))+\"\u003c/div\u003e\";\n          ln+=\"; PI = \"+fmt(pi,2)+\" (mín \"+fmt(P.pmin,2)+\": \"+(ok2?\"cumple\":\"NO cumple\")+\")\";\n          row.push(fmt(pi,2),fmt(P.pmin,2));\n        }\n        calc={t:(ok1&&ok2)?\"Cumple\":\"No cumple\",c:(ok1&&ok2)?\"ok\":\"bad\"};\n        row.push(calc);\n        mainRows.push(row);\n      }\n    }else{\n      var rs=[],vs=[];\n      for(var s=0;s\u003cns;s++){\n        var rr=g(\"s\"+s),vv=parse(stepV(i,s,P));\n        if(isFinite(rr)){rs.push(rr);vs.push(vv);}\n      }\n      if(rs.length\u003c2){h='\u003cdiv class=\"mut\"\u003eIngresa al menos 2 lecturas.\u003c/div\u003e';}\n      else{\n        complete=true;\n        var maxDrop=0,parts=[],srows=[];\n        for(var k=0;k\u003crs.length;k++){\n          var drop=k\u003e0?(rs[k-1]-rs[k])/rs[k-1]*100:0;\n          if(drop\u003emaxDrop)maxDrop=drop;\n          h+='\u003cdiv class=\"kv\"\u003e\u003cspan\u003e'+(isFinite(vs[k])?vs[k]+\" V\":\"Paso \"+(k+1))+\"\u003c/span\u003e\u003cb\u003e\"+fmtR(rs[k])+\"\u003c/b\u003e\"+(k\u003e0?chip(drop\u003c=P.drop,(drop\u003e0?\"−\":\"+\")+fmt(Math.abs(drop),1)+\" %\"):\"\")+\"\u003c/div\u003e\";\n          parts.push((isFinite(vs[k])?vs[k]+\" V\":\"paso \"+(k+1))+\" = \"+fmtR(rs[k]));\n          srows.push([String(k+1),isFinite(vs[k])?String(vs[k]):\"—\",fmtR(rs[k]),k\u003e0?(drop\u003e0?\"−\":\"+\")+fmt(Math.abs(drop),1)+\" %\":\"—\"]);\n        }\n        var lastc=rs[rs.length-1]*K;\n        ok1=!isFinite(mnMO)||lastc\u003e=mnMO;\n        ok2=maxDrop\u003c=P.drop;\n        h+='\u003cdiv class=\"kv\"\u003e\u003cspan\u003eÚltima lectura a 20 °C\u003c/span\u003e\u003cb\u003e'+fmtR(lastc)+\"\u003c/b\u003e\"+chip(ok1,(ok1?\"cumple\":\"bajo\")+\" mín \"+fmtR(mnMO))+\"\u003c/div\u003e\";\n        h+='\u003cdiv class=\"kv\"\u003e\u003cspan\u003eCaída máxima entre pasos\u003c/span\u003e\u003cb\u003e'+fmt(maxDrop,1)+\" %\u003c/b\u003e\"+chip(ok2,(ok2?\"cumple\":\"sobre\")+\" límite \"+fmt(P.drop,0)+\" %\")+\"\u003c/div\u003e\";\n        ln+=parts.join(\"; \")+\"; última a 20 °C = \"+fmtR(lastc)+\" (mín \"+fmtR(mnMO)+\": \"+(ok1?\"cumple\":\"NO cumple\")+\"); caída máx. \"+fmt(maxDrop,1)+\"% (límite \"+fmt(P.drop,0)+\"%: \"+(ok2?\"cumple\":\"NO cumple\")+\")\";\n        calc={t:(ok1&&ok2)?\"Cumple\":\"No cumple\",c:(ok1&&ok2)?\"ok\":\"bad\"};\n        stepTabs.push({titulo:t.n+\" · \"+PN[P.pr]+\" · \"+tv+\" V\",cols:[\"Paso\",\"Tensión (V)\",\"R 1 min\",\"Caída\"],filas:srows});\n        sumRows.push([t.n,tv+\" V\",fmtR(lastc),fmtR(mnMO),fmt(maxDrop,1)+\" %\",calc]);\n      }\n    }\n    if(complete){\n      done++;\n      var okAll=ok1&&ok2;\n      if(!okAll)calcFails++;\n      h+='\u003cdiv class=\"kv\"\u003e\u003cspan\u003eCálculo según criterios\u003c/span\u003e'+chip(okAll,okAll?\"CUMPLE\":\"NO CUMPLE\")+\"\u003c/div\u003e\";\n      ln+=\" → cálculo: \"+(okAll?\"cumple\":\"NO cumple\");\n    }\n    el.innerHTML=h;\n    if(S.dic[i])nDic++;\n    if(S.dic[i]===\"F\")nF++;\n    if(complete&&!S.dic[i])pend++;\n    var com=(S.com[i]||\"\").trim();\n    if(complete||S.dic[i]||com){\n      lines.push((complete?ln:t.n+\" · \"+PN[P.pr]+\": sin lecturas completas\")+\"\\n   Dictamen del técnico: \"+dtxt(i)+(com?\"\\n   Comentarios: \"+com:\"\"));\n      dictRows.push([t.n,calc,dcell(i),com||\"—\"]);\n    }\n  });\n  var nA=0;TESTS.forEach(function(t,i){if(S.dic[i]===\"A\")nA++;});\n  var s=$(\"sum\"),cls=\"\",big,small=\"\",res;\n  var parts=[];\n  if(nA)parts.push(nA+(nA===1?\" aprobada\":\" aprobadas\"));\n  if(nF)parts.push(nF+\" con falla\");\n  if(pend)parts.push(pend+(pend===1?\" pendiente\":\" pendientes\"));\n  if(done===0&&nDic===0){big=\"Sin mediciones\";small=\"Ingresa las lecturas del megóhmetro.\";res=\"sin mediciones\";}\n  else{\n    big=\"Dictamen del técnico: \"+(parts.join(\" · \")||\"sin dictamen\");\n    cls=nF\u003e0?\"warn\":(pend\u003e0?\"\":\"ok\");\n    small=pend\u003e0?\"Elige Aprobado o Falla en cada prueba. El cálculo es solo una referencia.\":\"\";\n    res=nF\u003e0?\"FALLA (\"+nF+\" de \"+TESTS.length+\" pruebas)\":((pend\u003e0||nDic===0)?\"PENDIENTE (falta dictamen del técnico)\":\"APROBADO\");\n  }\n  s.className=cls;s.innerHTML='\u003cdiv class=\"big\"\u003e'+big+'\u003c/div\u003e\u003cdiv class=\"small\"\u003e'+small+\"\u003c/div\u003e\";\n  var wb=$(\"warn\");\n  if(w.length){wb.style.display=\"block\";wb.innerHTML=w.map(function(x){return \"\u003cp style='margin:2px 0'\u003e⚠ \"+x+\"\u003c/p\u003e\";}).join(\"\");}else{wb.style.display=\"none\";wb.innerHTML=\"\";}\n  var crit=P.crit===\"F\"?fmt(P.rmin,2)+\" GΩ\":(P.crit===\"N\"?\"NETA\":\"1 MΩ/kV + 1\");\n  var lim=P.pr===\"D\"?\"DAR ≥ \"+fmt(P.dmin,2):(P.pr===\"I\"?\"PI ≥ \"+fmt(P.pmin,2):(tab?\"Caída ≤ \"+fmt(P.drop,0)+\" %\":\"—\"));\n  window.__resumen=\"Aislamiento · \"+PN[P.pr]+\" · \"+(P.tipo===\"A\"?\"aceite\":\"seco\")+\" · \"+fmt(P.t,1)+\" °C · unidad de lectura \"+un+\" · mínimo \"+crit+(P.pr===\"D\"?\" · DAR mín \"+fmt(P.dmin,2):\"\")+(P.pr===\"I\"?\" · PI mín \"+fmt(P.pmin,2):\"\")+(tab?\" · caída máx \"+fmt(P.drop,0)+\" %\":\"\")+\"\\n\"+lines.join(\"\\n\")+\"\\nResultado: \"+res;\n  var tablas=[{titulo:\"Condiciones de la prueba\",cols:[\"Tipo de prueba\",\"Aislamiento\",\"Temperatura\",\"Unidad\",\"Resistencia mínima\",\"Segundo criterio\"],filas:[[PN[P.pr],P.tipo===\"A\"?\"Aceite\":\"Seco\",fmt(P.t,1)+\" °C\",un,crit,lim]]}];\n  if(!tab){\n    var mc=[\"Prueba\",\"V prueba\"];\n    if(P.pr===\"D\")mc.push(\"R 30 s\",\"R 1 min\");else if(P.pr===\"I\")mc.push(\"R 1 min\",\"R 10 min\");else mc.push(\"R 1 min\");\n    mc.push(\"R 1 min a 20 °C\",\"Mínimo\");\n    if(P.pr===\"D\")mc.push(\"DAR\",\"DAR mín\");\n    if(P.pr===\"I\")mc.push(\"PI\",\"PI mín\");\n    mc.push(\"Cálculo\");\n    if(mainRows.length)tablas.push({titulo:\"Resultados por prueba\",cols:mc,filas:mainRows});\n  }else{\n    tablas=tablas.concat(stepTabs);\n    if(sumRows.length)tablas.push({titulo:\"Resumen\",cols:[\"Prueba\",\"V prueba\",\"Última a 20 °C\",\"Mínimo\",\"Caída máx.\",\"Cálculo\"],filas:sumRows});\n  }\n  if(dictRows.length)tablas.push({titulo:\"Dictamen del técnico\",cols:[\"Prueba\",\"Cálculo\",\"Dictamen\",\"Comentarios\"],filas:dictRows});\n  window.__datos={tablas:tablas};\n  save();\n}\nfunction save(){\n  try{\n    var f={};IDS.forEach(function(id){f[id]=$(id).value;});\n    localStorage.setItem(\"aisl2_\"+TIPO,JSON.stringify({f:f,v:S.v,tv:S.tv,dic:S.dic,com:S.com}));\n  }catch(e){}\n}\nfunction load(){\n  try{\n    var d=JSON.parse(localStorage.getItem(\"aisl2_\"+TIPO)||\"null\");\n    if(d){for(var id in d.f){if($(id))$(id).value=d.f[id];}S.v=d.v||{};S.tv=d.tv||{};S.dic=d.dic||{};S.com=d.com||{};}\n  }catch(e){}\n}\nIDS.forEach(function(id){$(id).addEventListener(\"input\",build);$(id).addEventListener(\"change\",build);});\n$(\"cls\").addEventListener(\"change\",function(){$(\"pmin\").value=$(\"cls\").value===\"A\"?\"1.5\":\"2\";build();});\n$(\"clear\").addEventListener(\"click\",function(){S.v={};S.tv={};S.min={};S.dic={};S.com={};build();});\n$(\"copy\").addEventListener(\"click\",function(){\n  var txt=window.__resumen||\"\",ta=$(\"ta\"),b=$(\"copy\");\n  function manual(){ta.style.display=\"block\";ta.value=txt;ta.focus();ta.select();b.textContent=\"Selecciona y copia\";}\n  try{navigator.clipboard.writeText(txt).then(function(){b.textContent=\"Copiado\";setTimeout(function(){b.textContent=\"Copiar resumen\";},1500);},manual);}catch(e){manual();}\n});\nvar DEF={};IDS.forEach(function(id){DEF[id]=$(id).value;});\nfunction setTrafo(t,first){\n  if(!first)save();\n  TIPO=t.tipo;\n  S.v={};S.tv={};S.min={};S.dic={};S.com={};\n  IDS.forEach(function(id){$(id).value=DEF[id];});\n  $(\"v1\").value=t.v1;$(\"v2\").value=t.v2;\n  load();\n  build();\n  if(window.obsLoad)obsLoad();\n}\nvar t0=null;\ntry{t0=window.parent&&window.parent!==window?window.parent.TRAFO:null;}catch(e){}\nsetTrafo(t0||{tipo:\"3\",fases:3,v1:13200,v2:220},true);\n\u003c/script\u003e\n\u003c/body\u003e\n\u003c/html\u003e\n",D:"\u003c!DOCTYPE html\u003e\n\u003chtml lang=\"es\"\u003e\n\u003chead\u003e\n\u003cmeta charset=\"utf-8\"\u003e\n\u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\"\u003e\n\u003ctitle\u003eResistencia de devanados\u003c/title\u003e\n\u003cstyle\u003e\n:root{\n  --bg:#f6f5f1; --surface:#ffffff; --surface-1:#efede7;\n  --tp:#1d1d1b; --ts:#5c5b56; --tm:#8d8b84;\n  --border:#d9d6cc; --bs:#b9b6aa; --accent:#0f7a5c;\n  --ok:#1b7f4b; --ok-bg:#dff3e6; --bad:#b3261e; --bad-bg:#fbe3e0; --none-bg:#e8e6df; --warn-bg:#fdf0d5; --warn:#7a4b00;\n  --font:system-ui,-apple-system,\"Segoe UI\",Roboto,\"Helvetica Neue\",Arial,sans-serif;\n}\n@media (prefers-color-scheme: dark){\n  :root{\n    --bg:#161614; --surface:#1f1f1c; --surface-1:#2a2a26;\n    --tp:#f1efe8; --ts:#b5b2a7; --tm:#85837a;\n    --border:#3a3a35; --bs:#58574f; --accent:#4cc9a2;\n    --ok:#6fdca4; --ok-bg:#16382a; --bad:#ff9a8c; --bad-bg:#4a201b; --none-bg:#2f2f2a; --warn-bg:#40320f; --warn:#f2c46b;\n  }\n}\n*{box-sizing:border-box}\nhtml{-webkit-text-size-adjust:100%}\nbody{margin:0;background:var(--bg);color:var(--tp);font-family:var(--font);line-height:1.45;\n  padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}\nmain{max-width:520px;margin:0 auto;padding:18px 14px 48px}\nh1{font-size:22px;font-weight:600;margin:0 0 4px;letter-spacing:-0.01em}\n.sub{margin:0 0 14px;color:var(--ts);font-size:14px}\n.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin:0 0 12px}\n.card h2{font-size:15px;font-weight:600;margin:0 0 10px;color:var(--ts)}\n.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}\n.full{grid-column:1/-1}\nlabel{display:block;font-size:12px;color:var(--ts);margin:0 0 3px}\ninput,select{font:inherit;font-size:16px;width:100%;min-height:44px;padding:8px 10px;border:1px solid var(--bs);\n  border-radius:9px;background:var(--bg);color:var(--tp)}\ninput:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:1px}\n#sum{position:sticky;top:0;z-index:5;margin:0 0 12px;padding:12px 14px;border-radius:14px;border:1px solid var(--border);background:var(--surface)}\n#sum .big{font-size:17px;font-weight:600}\n#sum .small{font-size:13px;color:var(--ts);margin-top:2px}\n#sum.ok{background:var(--ok-bg);border-color:var(--ok)} #sum.ok .big{color:var(--ok)}\n#sum.bad{background:var(--bad-bg);border-color:var(--bad)} #sum.bad .big{color:var(--bad)}\n#sum.warn{background:var(--warn-bg);border-color:var(--warn)} #sum.warn .big{color:var(--warn)}\n.blk+.blk{margin-top:14px;padding-top:14px;border-top:1px dashed var(--bs)}\n.head{margin:0 0 8px}\n.head b{font-size:15px}\n.ph{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}\n.ph input{padding:8px 6px;text-align:center}\n.rf{margin-top:8px}\n.res{margin-top:10px;font-size:14px}\n.res .kv{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--border)}\n.res .kv:first-child{border-top:0}\n.res .kv span{color:var(--ts)}\n.chip{font-size:12px;font-weight:600;border-radius:7px;padding:2px 8px;white-space:nowrap;background:var(--none-bg);color:var(--tm)}\n.chip.ok{background:var(--ok-bg);color:var(--ok)}\n.chip.bad{background:var(--bad-bg);color:var(--bad)}\n.mut{color:var(--tm);font-size:13px}\n.btns{display:flex;gap:8px;flex-wrap:wrap}\nbutton{font:inherit;font-size:15px;font-weight:500;min-height:44px;padding:8px 14px;border-radius:10px;border:1px solid var(--bs);background:var(--surface);color:var(--tp);cursor:pointer}\n.note{font-size:12.5px;color:var(--tm);margin:10px 2px 0}\n.cur{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:8px}\ntextarea{width:100%;height:150px;font:12px monospace;margin-top:8px;display:none;background:var(--bg);color:var(--tp);border:1px solid var(--bs);border-radius:8px}\n\u003c/style\u003e\n\u003c/head\u003e\n\u003cbody\u003e\n\u003cmain\u003e\n  \u003ch1\u003eResistencia de devanados\u003c/h1\u003e\n  \u003cp class=\"sub\"\u003eCompara las tres fases entre sí y contra el valor de fábrica, corregido por temperatura. Los terminales de lectura siguen el grupo de conexión elegido en Índice horario.\u003c/p\u003e\n\n  \u003cdiv id=\"sum\" role=\"status\" aria-live=\"polite\"\u003e\u003c/div\u003e\n\n  \u003csection class=\"card\"\u003e\n    \u003ch2\u003eDatos de la prueba\u003c/h2\u003e\n    \u003cdiv class=\"g2\"\u003e\n      \u003cdiv\u003e\u003clabel for=\"unit\"\u003eUnidad lecturas AT\u003c/label\u003e\u003cselect id=\"unit\"\u003e\u003coption value=\"0.001\"\u003emΩ\u003c/option\u003e\u003coption value=\"1\" selected\u003eΩ\u003c/option\u003e\u003c/select\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"unitb\"\u003eUnidad lecturas BT\u003c/label\u003e\u003cselect id=\"unitb\"\u003e\u003coption value=\"0.001\" selected\u003emΩ\u003c/option\u003e\u003coption value=\"1\"\u003eΩ\u003c/option\u003e\u003c/select\u003e\u003c/div\u003e\n      \u003cdiv class=\"full\"\u003e\u003clabel for=\"mat\"\u003eMaterial del devanado\u003c/label\u003e\u003cselect id=\"mat\"\u003e\u003coption value=\"234.5\"\u003eCobre\u003c/option\u003e\u003coption value=\"225\"\u003eAluminio\u003c/option\u003e\u003c/select\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"tm\"\u003eTemperatura al medir (°C)\u003c/label\u003e\u003cinput id=\"tm\" type=\"text\" inputmode=\"decimal\" value=\"20\"\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"tr\"\u003eTemperatura de referencia (°C)\u003c/label\u003e\u003cinput id=\"tr\" type=\"text\" inputmode=\"decimal\" value=\"75\"\u003e\u003c/div\u003e\n      \u003cdiv id=\"tolfwrap\"\u003e\u003clabel for=\"tolf\"\u003eDesbalance entre fases (± %)\u003c/label\u003e\u003cinput id=\"tolf\" type=\"text\" inputmode=\"decimal\" value=\"2\"\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"tolr\"\u003eDesviación vs fábrica (± %)\u003c/label\u003e\u003cinput id=\"tolr\" type=\"text\" inputmode=\"decimal\" value=\"5\"\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"nat\"\u003ePosiciones del tap en AT\u003c/label\u003e\u003cinput id=\"nat\" type=\"text\" inputmode=\"numeric\" value=\"5\"\u003e\u003c/div\u003e\n      \u003cdiv\u003e\u003clabel for=\"nbt\"\u003ePosiciones del tap en BT\u003c/label\u003e\u003cinput id=\"nbt\" type=\"text\" inputmode=\"numeric\" value=\"1\"\u003e\u003c/div\u003e\n      \u003cdiv id=\"cawrap\"\u003e\u003clabel for=\"ca\"\u003eConexión AT\u003c/label\u003e\u003cselect id=\"ca\"\u003e\u003coption value=\"Y\"\u003eEstrella (Y)\u003c/option\u003e\u003coption value=\"D\" selected\u003eDelta (D)\u003c/option\u003e\u003c/select\u003e\u003c/div\u003e\n      \u003cdiv id=\"cbwrap\"\u003e\u003clabel for=\"cb\"\u003eConexión BT\u003c/label\u003e\u003cselect id=\"cb\"\u003e\u003coption value=\"Y\" selected\u003eEstrella (y)\u003c/option\u003e\u003coption value=\"D\"\u003eDelta (d)\u003c/option\u003e\u003c/select\u003e\u003c/div\u003e\n      \u003cdiv id=\"nnawrap\"\u003e\u003clabel for=\"nna\"\u003eNeutro AT accesible\u003c/label\u003e\u003cselect id=\"nna\"\u003e\u003coption value=\"0\" selected\u003eNo\u003c/option\u003e\u003coption value=\"1\"\u003eSí\u003c/option\u003e\u003c/select\u003e\u003c/div\u003e\n      \u003cdiv id=\"nnbwrap\"\u003e\u003clabel for=\"nnb\"\u003eNeutro BT accesible\u003c/label\u003e\u003cselect id=\"nnb\"\u003e\u003coption value=\"1\" selected\u003eSí\u003c/option\u003e\u003coption value=\"0\"\u003eNo\u003c/option\u003e\u003c/select\u003e\u003c/div\u003e\n      \u003cdiv class=\"full\"\u003e\u003clabel for=\"iat\"\u003eCorriente aplicada en AT\u003c/label\u003e\n        \u003cdiv class=\"cur\"\u003e\u003cinput id=\"iat\" type=\"text\" inputmode=\"decimal\" placeholder=\"Ej. 10\"\u003e\n        \u003cselect id=\"uat\" aria-label=\"Unidad de corriente AT\"\u003e\u003coption value=\"µA\"\u003eµA\u003c/option\u003e\u003coption value=\"mA\"\u003emA\u003c/option\u003e\u003coption value=\"A\" selected\u003eA\u003c/option\u003e\u003c/select\u003e\u003c/div\u003e\u003c/div\u003e\n      \u003cdiv class=\"full\"\u003e\u003clabel for=\"ibt\"\u003eCorriente aplicada en BT\u003c/label\u003e\n        \u003cdiv class=\"cur\"\u003e\u003cinput id=\"ibt\" type=\"text\" inputmode=\"decimal\" placeholder=\"Ej. 10\"\u003e\n        \u003cselect id=\"ubt\" aria-label=\"Unidad de corriente BT\"\u003e\u003coption value=\"µA\"\u003eµA\u003c/option\u003e\u003coption value=\"mA\"\u003emA\u003c/option\u003e\u003coption value=\"A\" selected\u003eA\u003c/option\u003e\u003c/select\u003e\u003c/div\u003e\u003c/div\u003e\n    \u003c/div\u003e\n    \u003cp class=\"note\"\u003eMide con el transformador desenergizado y descargado, con corriente continua baja y esperando a que la lectura se estabilice. Usa la temperatura del aceite o del devanado. El valor de fábrica es opcional.\u003c/p\u003e\n  \u003c/section\u003e\n\n  \u003cdiv id=\"secs\"\u003e\u003c/div\u003e\n\n  \u003csection class=\"card\"\u003e\n    \u003cdiv class=\"btns\"\u003e\n      \u003cbutton type=\"button\" id=\"copy\"\u003eCopiar resumen\u003c/button\u003e\n      \u003cbutton type=\"button\" id=\"clear\"\u003eBorrar mediciones\u003c/button\u003e\n    \u003c/div\u003e\n    \u003ctextarea id=\"ta\" readonly aria-label=\"Resumen\"\u003e\u003c/textarea\u003e\n  \u003c/section\u003e\n\n  \u003cp class=\"note\"\u003eCorrección: R a la temperatura de referencia = R medida × (K + Tref) / (K + Tmedición), con K = 234,5 para cobre y 225 para aluminio. Desbalance = (mayor − menor) / promedio × 100. Los límites de 2 % entre fases y 5 % contra fábrica son valores habituales; verifica los que aplican a tu equipo. Los datos quedan guardados en este navegador.\u003c/p\u003e\n\u003cstyle\u003e\n.obsb{background:var(--surface,#fff);border:1px solid var(--border,#d9d6cc);border-radius:14px;padding:14px;margin:12px 0 0}\n.obsb h2{font-size:15px;font-weight:600;margin:0 0 10px;color:var(--ts,var(--text-secondary,#5c5b56))}\n.obsb textarea{display:block;width:100%;height:90px;margin:0;font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--bs,#b9b6aa);border-radius:9px;background:var(--bg,#f6f5f1);color:var(--tp,#1d1d1b);resize:vertical}\n\u003c/style\u003e\n\u003csection class=\"obsb\" id=\"obsBox\"\u003e\n  \u003ch2\u003eObservaciones\u003c/h2\u003e\n  \u003ctextarea id=\"obsText\" placeholder=\"Observaciones de esta prueba (opcional)\"\u003e\u003c/textarea\u003e\n\u003c/section\u003e\n\u003cscript\u003e\n(function(){\n  var ta=document.getElementById(\"obsText\");\n  function key(){return \"dev2_obs_\"+(typeof TIPO===\"string\"?TIPO:\"3\");}\n  window.__obs=\"\";\n  window.obsLoad=function(){\n    var v=\"\";\n    try{v=localStorage.getItem(key())||\"\";}catch(e){}\n    ta.value=v;window.__obs=v;\n  };\n  ta.addEventListener(\"input\",function(){\n    window.__obs=ta.value;\n    try{localStorage.setItem(key(),ta.value);}catch(e){}\n  });\n})();\n\u003c/script\u003e\n\u003cstyle\u003e\n.fotos{background:var(--surface,#fff);border:1px solid var(--border,#d9d6cc);border-radius:14px;padding:14px;margin:12px 0 0}\n.fotos h2{font-size:15px;font-weight:600;margin:0 0 10px;color:var(--ts,var(--text-secondary,#5c5b56))}\n.fotos .frow{display:flex;gap:8px;flex-wrap:wrap}\n.fotos .fbtn{flex:1 1 40%;display:flex;align-items:center;justify-content:center;min-height:48px;padding:8px 12px;border-radius:10px;border:1px solid var(--bs,var(--border-strong,#b9b6aa));background:var(--bg,#f6f5f1);color:var(--tp,var(--text-primary,#1d1d1b));font:inherit;font-size:15px;font-weight:600;cursor:pointer;margin:0}\n.fotos .fgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}\n.fotos .fth{position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--border,#d9d6cc);aspect-ratio:1/1;background:#fff}\n.fotos .fth img{width:100%;height:100%;object-fit:cover;display:block}\n.fotos .fth button{position:absolute;top:4px;right:4px;width:30px;height:30px;border-radius:15px;border:0;background:rgba(0,0,0,.65);color:#fff;font-size:18px;line-height:1;cursor:pointer;padding:0}\n.fotos .nt{font-size:12.5px;color:var(--tm,var(--text-muted,#8d8b84));margin:10px 2px 0}\n\u003c/style\u003e\n\u003csection class=\"fotos\" id=\"fotosBox\"\u003e\n  \u003ch2\u003eFotos de la prueba\u003c/h2\u003e\n  \u003cdiv class=\"frow\"\u003e\n    \u003clabel class=\"fbtn\"\u003eTomar foto\u003cinput id=\"fotoCam\" type=\"file\" accept=\"image/*\" capture=\"environment\" hidden\u003e\u003c/label\u003e\n    \u003clabel class=\"fbtn\"\u003eGalería\u003cinput id=\"fotoGal\" type=\"file\" accept=\"image/*\" multiple hidden\u003e\u003c/label\u003e\n  \u003c/div\u003e\n  \u003cdiv id=\"fotoGrid\" class=\"fgrid\"\u003e\u003c/div\u003e\n  \u003cp class=\"nt\" id=\"fotoN\"\u003e\u003c/p\u003e\n  \u003cp class=\"nt\"\u003eLas fotos se guardan solo cuando guardas el informe en este dispositivo.\u003c/p\u003e\n\u003c/section\u003e\n\u003cscript\u003e\n(function(){\n  var fotos=window.__fotos=[];window.__setFotos=function(a){fotos.length=0;(a||[]).forEach(function(x){fotos.push(x);});draw();};\n  var box=document.getElementById(\"fotoGrid\"),nt=document.getElementById(\"fotoN\");\n  function draw(){\n    box.innerHTML=\"\";\n    fotos.forEach(function(src,i){\n      var d=document.createElement(\"div\");d.className=\"fth\";\n      var im=document.createElement(\"img\");im.src=src;im.alt=\"Foto \"+(i+1);\n      var b=document.createElement(\"button\");b.type=\"button\";b.textContent=\"×\";b.setAttribute(\"aria-label\",\"Quitar foto \"+(i+1));\n      b.onclick=function(){fotos.splice(i,1);draw();};\n      d.appendChild(im);d.appendChild(b);box.appendChild(d);\n    });\n    nt.textContent=fotos.length?fotos.length+(fotos.length===1?\" foto lista\":\" fotos listas\")+\" para el informe\":\"Sin fotos\";\n  }\n  function add(file){\n    var rd=new FileReader();\n    rd.onload=function(){\n      var img=new Image();\n      img.onload=function(){\n        var sc=Math.min(1,1000/Math.max(img.width,img.height)),c=document.createElement(\"canvas\");\n        c.width=Math.max(1,Math.round(img.width*sc));c.height=Math.max(1,Math.round(img.height*sc));\n        c.getContext(\"2d\").drawImage(img,0,0,c.width,c.height);\n        fotos.push(c.toDataURL(\"image/jpeg\",0.72));draw();\n      };\n      img.src=rd.result;\n    };\n    rd.readAsDataURL(file);\n  }\n  [\"fotoCam\",\"fotoGal\"].forEach(function(id){\n    document.getElementById(id).addEventListener(\"change\",function(e){\n      var fs=e.target.files;for(var i=0;i\u003cfs.length;i++)add(fs[i]);e.target.value=\"\";\n    });\n  });\n  draw();\n})();\n\u003c/script\u003e\n\u003c/main\u003e\n\n\u003cscript\u003e\nvar S={d:{}};\nvar TIPO=\"3\",NF=3;\nvar IDS=[\"unit\",\"unitb\",\"mat\",\"tm\",\"tr\",\"tolf\",\"tolr\",\"nat\",\"nbt\",\"ca\",\"cb\",\"nna\",\"nnb\",\"iat\",\"uat\",\"ibt\",\"ubt\"];\nfunction $(id){return document.getElementById(id);}\nfunction parse(s){\n  var t=String(s==null?\"\":s).trim().replace(/\\s/g,\"\");\n  if(!t)return NaN;\n  if(t.indexOf(\",\")\u003e=0&&t.indexOf(\".\")\u003e=0){\n    if(t.lastIndexOf(\",\")\u003et.lastIndexOf(\".\"))t=t.replace(/\\./g,\"\").replace(/,/g,\".\");\n    else t=t.replace(/,/g,\"\");\n  }else if(t.indexOf(\",\")\u003e=0){t=t.replace(\",\",\".\");}\n  var v=parseFloat(t.replace(/[^0-9.\\-+eE]/g,\"\"));\n  return isFinite(v)?v:NaN;\n}\nfunction parseMiles(s){\n  var t=String(s==null?\"\":s).trim().replace(/\\s/g,\"\");\n  if(!t)return NaN;\n  if(t.indexOf(\",\")\u003e=0)return parse(t);\n  var p=t.split(\".\");\n  if(p.length\u003e2)return parseFloat(p.join(\"\"));\n  if(p.length===2&&p[1].length===3&&p[0].length\u003c=3)return parseFloat(p.join(\"\"));\n  return parseFloat(t);\n}\nfunction numV(id){return parseMiles($(id).value);}\nfunction num(id){return parse($(id).value);}\nfunction fmt(x,d){return isFinite(x)?x.toFixed(d):\"—\";}\nfunction cnt(id){var n=Math.round(num(id));if(!(n\u003e=1))n=1;if(n\u003e17)n=17;return n;}\nfunction params(){\n  var tolf=num(\"tolf\"),tolr=num(\"tolr\");\n  return {f:parseFloat($(\"unit\").value),fb:parseFloat($(\"unitb\").value),k:parseFloat($(\"mat\").value),tm:num(\"tm\"),tr:num(\"tr\"),\n    tolf:tolf\u003e=0?tolf:2,tolr:tolr\u003e=0?tolr:5,nat:cnt(\"nat\"),nbt:cnt(\"nbt\"),\n    ca:$(\"ca\").value,cb:$(\"cb\").value,nna:$(\"nna\").value,nnb:$(\"nnb\").value,\n    iat:$(\"iat\").value.trim(),uat:$(\"uat\").value,ibt:$(\"ibt\").value.trim(),ubt:$(\"ubt\").value};\n}\nfunction labs(w,P){\n  if(NF===1)return w===\"A\"?[\"H1–H2\"]:[\"X1–X2\"];\n  var nm=w===\"A\"?[\"U\",\"V\",\"W\"]:[\"X\",\"Y\",\"Z\"],c=w===\"A\"?P.ca:P.cb,nn=w===\"A\"?P.nna:P.nnb;\n  if(c===\"Y\"&&nn===\"1\")return [nm[0]+\"–N\",nm[1]+\"–N\",nm[2]+\"–N\"];\n  return [nm[0]+\"–\"+nm[1],nm[1]+\"–\"+nm[2],nm[2]+\"–\"+nm[0]];\n}\nfunction ctext(w,P){\n  var v=w===\"A\"?P.iat:P.ibt,u=w===\"A\"?P.uat:P.ubt;\n  return v?v+\" \"+u:\"no registrada\";\n}\nfunction fmtO(o){\n  if(!isFinite(o))return \"—\";\n  return o\u003c1?(o*1000).toFixed(2)+\" mΩ\":o.toFixed(4)+\" Ω\";\n}\nfunction vis(P){\n  var s3=NF===3;\n  $(\"cawrap\").style.display=s3?\"block\":\"none\";\n  $(\"cbwrap\").style.display=s3?\"block\":\"none\";\n  $(\"tolfwrap\").style.display=s3?\"block\":\"none\";\n  $(\"nnawrap\").style.display=(s3&&P.ca===\"Y\")?\"block\":\"none\";\n  $(\"nnbwrap\").style.display=(s3&&P.cb===\"Y\")?\"block\":\"none\";\n}\nfunction build(){\n  var P=params(),h=\"\";\n  vis(P);\n  [\"A\",\"B\"].forEach(function(w){\n    var n=w===\"A\"?P.nat:P.nbt,L=labs(w,P),fw=w===\"A\"?P.f:P.fb,u=fw===0.001?\"mΩ\":\"Ω\";\n    h+='\u003csection class=\"card\"\u003e\u003ch2\u003eDevanado '+(w===\"A\"?\"AT\":\"BT\")+\" · corriente aplicada: \"+ctext(w,P)+\"\u003c/h2\u003e\";\n    for(var r=0;r\u003cn;r++){\n      var key=w+\"-\"+r;\n      h+='\u003cdiv class=\"blk\"\u003e\u003cdiv class=\"head\"\u003e\u003cb\u003e'+(n\u003e1?\"Posición \"+(r+1):\"Posición única\")+'\u003c/b\u003e\u003c/div\u003e\u003cdiv class=\"ph\" style=\"grid-template-columns:repeat('+NF+',minmax(0,1fr))\"\u003e';\n      for(var c=0;c\u003cNF;c++){\n        var k=key+\"-\"+c,val=S.d[k]!==undefined?S.d[k]:\"\";\n        h+='\u003cdiv\u003e\u003clabel for=\"d'+k+'\"\u003e'+L[c]+\" (\"+u+')\u003c/label\u003e\u003cinput id=\"d'+k+'\" class=\"di\" data-k=\"'+k+'\" type=\"text\" inputmode=\"decimal\" value=\"'+val+'\"\u003e\u003c/div\u003e';\n      }\n      h+='\u003c/div\u003e\u003cdiv class=\"g2 rf\"\u003e\u003cdiv\u003e\u003clabel for=\"d'+key+'-ref\"\u003eFábrica, promedio ('+u+', opcional)\u003c/label\u003e\u003cinput id=\"d'+key+'-ref\" class=\"di\" data-k=\"'+key+'-ref\" type=\"text\" inputmode=\"decimal\" value=\"'+(S.d[key+\"-ref\"]!==undefined?S.d[key+\"-ref\"]:\"\")+'\"\u003e\u003c/div\u003e';\n      h+='\u003cdiv\u003e\u003clabel for=\"d'+key+'-rt\"\u003eTemp. de fábrica (°C)\u003c/label\u003e\u003cinput id=\"d'+key+'-rt\" class=\"di\" data-k=\"'+key+'-rt\" type=\"text\" inputmode=\"decimal\" value=\"'+(S.d[key+\"-rt\"]!==undefined?S.d[key+\"-rt\"]:\"\")+'\"\u003e\u003c/div\u003e\u003c/div\u003e';\n      h+='\u003cdiv class=\"res\" id=\"r'+key+'\"\u003e\u003c/div\u003e\u003c/div\u003e';\n    }\n    h+=\"\u003c/section\u003e\";\n  });\n  $(\"secs\").innerHTML=h;\n  var a=document.querySelectorAll(\".di\");\n  for(var i=0;i\u003ca.length;i++){a[i].addEventListener(\"input\",function(e){S.d[e.target.dataset.k]=e.target.value;update();});}\n  update();\n}\nfunction chip(ok,t){return '\u003cspan class=\"chip '+(ok?\"ok\":\"bad\")+'\"\u003e'+t+\"\u003c/span\u003e\";}\nfunction update(){\n  var P=params(),n=0,ev=0,fails=[],lines=[],worstU=0,worstD=0,kf=(P.k+P.tr)/(P.k+P.tm),u=P.f===0.001?\"mΩ\":\"Ω\",tabs={A:[],B:[]},tables=[];\n  [\"A\",\"B\"].forEach(function(w){\n    var cnum=w===\"A\"?P.nat:P.nbt,L=labs(w,P),fw=w===\"A\"?P.f:P.fb,u=fw===0.001?\"mΩ\":\"Ω\";\n    for(var r=0;r\u003ccnum;r++){\n      var key=w+\"-\"+r,el=$(\"r\"+key),nm=(w===\"A\"?\"AT\":\"BT\")+(cnum\u003e1?\" pos \"+(r+1):\"\");\n      var idx=NF===1?[0]:[0,1,2];\n      var raws=idx.map(function(c){var x=S.d[key+\"-\"+c];return x===undefined?\"\":String(x).trim();});\n      var vals=idx.map(function(c){var x=parse(S.d[key+\"-\"+c]===undefined?\"\":S.d[key+\"-\"+c]);return isFinite(x)&&x\u003e0?x*fw:NaN;});\n      var got=vals.filter(isFinite).length;\n      if(got\u003cNF){el.innerHTML='\u003cdiv class=\"mut\"\u003e'+(got===0?(NF===1?\"Ingresa la lectura.\":\"Ingresa las 3 lecturas.\"):\"Faltan \"+(NF-got)+\" lecturas.\")+\"\u003c/div\u003e\";continue;}\n      var avg=vals.reduce(function(a,b){return a+b;},0)/NF,mx=Math.max.apply(null,vals),mn=Math.min.apply(null,vals);\n      var unb=NF===3?(mx-mn)/avg*100:0,avgc=isFinite(kf)?avg*kf:avg;\n      var ok=true,h=\"\",refTxt=\"—\",devTxt=\"—\";\n      var ln=nm+\" [\"+L.join(\" / \")+\"]: \"+raws.join(\" | \")+\" \"+u+\" · promedio \"+fmtO(avg)+\" · a \"+fmt(P.tr,0)+\" °C \"+fmtO(avgc);\n      n++;\n      h+='\u003cdiv class=\"kv\"\u003e\u003cspan\u003e'+(NF===1?\"Valor\":\"Promedio\")+\" a \"+fmt(P.tr,0)+' °C\u003c/span\u003e\u003cb\u003e'+fmtO(avgc)+\"\u003c/b\u003e\u003c/div\u003e\";\n      if(NF===3){\n        var okU=unb\u003c=P.tolf;\n        ev++;\n        if(unb\u003eworstU)worstU=unb;\n        if(!okU)ok=false;\n        h+='\u003cdiv class=\"kv\"\u003e\u003cspan\u003eDesbalance entre fases\u003c/span\u003e\u003cb\u003e'+fmt(unb,2)+\" %\u003c/b\u003e\"+chip(okU,okU?\"dentro\":\"fuera de ±\"+fmt(P.tolf,1)+\" %\")+\"\u003c/div\u003e\";\n        ln+=\" · desbalance \"+fmt(unb,2)+\"% (límite ±\"+fmt(P.tolf,1)+\"%\"+(okU?\"\":\": FALLA\")+\")\";\n      }\n      var rv=parse(S.d[key+\"-ref\"]===undefined?\"\":S.d[key+\"-ref\"]),rt=parse(S.d[key+\"-rt\"]===undefined?\"\":S.d[key+\"-rt\"]);\n      if(isFinite(rv)&&rv\u003e0){\n        var refc=rv*fw*(P.k+P.tr)/(P.k+(isFinite(rt)?rt:P.tr)),dev=(avgc-refc)/refc*100,okD=Math.abs(dev)\u003c=P.tolr;\n        ev++;\n        if(Math.abs(dev)\u003eworstD)worstD=Math.abs(dev);\n        if(!okD)ok=false;\n        refTxt=fmtO(refc);devTxt=(dev\u003e0?\"+\":\"\")+fmt(dev,2)+\" %\";\n        h+='\u003cdiv class=\"kv\"\u003e\u003cspan\u003eDesviación vs fábrica\u003c/span\u003e\u003cb\u003e'+(dev\u003e0?\"+\":\"\")+fmt(dev,2)+\" %\u003c/b\u003e\"+chip(okD,okD?\"dentro\":\"fuera de ±\"+fmt(P.tolr,1)+\" %\")+\"\u003c/div\u003e\";\n        ln+=\" · fábrica \"+fmtO(refc)+\" a \"+fmt(P.tr,0)+\" °C · desviación \"+(dev\u003e0?\"+\":\"\")+fmt(dev,2)+\"% (límite ±\"+fmt(P.tolr,1)+\"%\"+(okD?\"\":\": FALLA\")+\")\";\n      }\n      ln+=\" · corriente \"+ctext(w,P);\n      if(!ok)fails.push(nm);\n      el.innerHTML=h;\n      lines.push(ln);\n      var rowT=[cnum\u003e1?String(r+1):\"Única\"].concat(raws).concat([fmtO(avg),fmtO(avgc)]);\n      if(NF===3)rowT.push(fmt(unb,2)+\" %\");\n      rowT.push(refTxt,devTxt,{t:ok?\"OK\":\"FALLA\",c:ok?\"ok\":\"bad\"});\n      tabs[w].push(rowT);\n    }\n    if(tabs[w].length){\n      var cols=[\"Pos\"].concat(L.map(function(l){return l+\" (\"+u+\")\";})).concat([\"Promedio\",\"A \"+fmt(P.tr,0)+\" °C\"]);\n      if(NF===3)cols.push(\"Desbalance\");\n      cols.push(\"Fábrica\",\"Desviación\",\"Estado\");\n      tables.push({titulo:\"Devanado \"+(w===\"A\"?\"AT\":\"BT\")+\" · corriente aplicada \"+ctext(w,P),cols:cols,filas:tabs[w]});\n    }\n  });\n  var s=$(\"sum\"),cls=\"\",big,small=\"\";\n  if(n===0){big=\"Sin mediciones\";small=NF===1?\"Ingresa la lectura de cada posición.\":\"Ingresa las tres lecturas de cada posición.\";}\n  else if(fails.length){cls=\"warn\";big=fails.length+\" de \"+n+\" posiciones fuera de tolerancia\";small=\"Fuera de tolerancia: \"+fails.slice(0,5).join(\", \")+(fails.length\u003e5?\"…\":\"\")+(NF===3?\". Desbalance máx. \"+fmt(worstU,2)+\" %.\":\".\");}\n  else if(ev===0){big=\"REGISTRADO · \"+n+\" posiciones\";small=\"Sin valor de fábrica para comparar: solo se registró la resistencia corregida.\";}\n  else{cls=\"ok\";big=\"Todas las posiciones dentro de tolerancia\";small=(NF===3?\"Desbalance máximo \"+fmt(worstU,2)+\" % (límite ±\"+fmt(P.tolf,1)+\" %)\"+(worstD\u003e0?\"; \":\".\"):\"\")+(worstD\u003e0?\"desviación máx. vs fábrica \"+fmt(worstD,2)+\" %.\":\"\");}\n  s.className=cls;s.innerHTML='\u003cdiv class=\"big\"\u003e'+big+'\u003c/div\u003e\u003cdiv class=\"small\"\u003e'+small+\"\u003c/div\u003e\";\n  var conn=NF===3?\" · AT \"+(P.ca===\"Y\"?\"estrella\":\"delta\")+\" / BT \"+(P.cb===\"Y\"?\"estrella\":\"delta\"):\" · monofásico\";\n  window.__resumen=\"Resistencia de devanados\"+conn+\" · \"+(P.k===234.5?\"cobre\":\"aluminio\")+\" · medido a \"+fmt(P.tm,1)+\" °C, referencia \"+fmt(P.tr,0)+\" °C · corriente aplicada AT \"+ctext(\"A\",P)+\", BT \"+ctext(\"B\",P)+\"\\n\"+lines.join(\"\\n\")+\"\\nResultado: \"+(n===0?\"sin mediciones\":fails.length?\"FUERA DE TOLERANCIA (\"+fails.length+\")\":(ev===0?\"REGISTRADO\":\"APROBADO\"));\n  window.__datos={tablas:[{titulo:\"Condiciones\",cols:[\"Material\",\"Temperatura al medir\",\"Temperatura de referencia\",\"Límite entre fases\",\"Límite vs fábrica\"],filas:[[P.k===234.5?\"Cobre\":\"Aluminio\",fmt(P.tm,1)+\" °C\",fmt(P.tr,0)+\" °C\",NF===3?\"±\"+fmt(P.tolf,1)+\" %\":\"—\",\"±\"+fmt(P.tolr,1)+\" %\"]]}].concat(tables)};\n  save();\n}\nfunction save(){\n  try{\n    var f={};IDS.forEach(function(id){f[id]=$(id).value;});\n    localStorage.setItem(\"dev2_\"+TIPO,JSON.stringify({f:f,d:S.d}));\n  }catch(e){}\n}\nfunction load(){\n  try{\n    var d=JSON.parse(localStorage.getItem(\"dev2_\"+TIPO)||\"null\");\n    if(d){for(var id in d.f){if($(id))$(id).value=d.f[id];}S.d=d.d||{};}\n  }catch(e){}\n}\nIDS.forEach(function(id){$(id).addEventListener(\"input\",build);$(id).addEventListener(\"change\",build);});\n$(\"clear\").addEventListener(\"click\",function(){S.d={};build();});\n$(\"copy\").addEventListener(\"click\",function(){\n  var txt=window.__resumen||\"\",ta=$(\"ta\"),b=$(\"copy\");\n  function manual(){ta.style.display=\"block\";ta.value=txt;ta.focus();ta.select();b.textContent=\"Selecciona y copia\";}\n  try{navigator.clipboard.writeText(txt).then(function(){b.textContent=\"Copiado\";setTimeout(function(){b.textContent=\"Copiar resumen\";},1500);},manual);}catch(e){manual();}\n});\nvar DEF={};IDS.forEach(function(id){DEF[id]=$(id).value;});\nfunction setGrupo(g){\n  if(NF!==3||!g||g.fases!==3)return;\n  $(\"ca\").value=g.p;$(\"cb\").value=g.s;\n  build();\n}\nfunction setTrafo(t,first){\n  if(!first)save();\n  TIPO=t.tipo;NF=t.fases;\n  S.d={};\n  IDS.forEach(function(id){$(id).value=DEF[id];});\n  if(NF===1){$(\"nat\").value=\"1\";$(\"nbt\").value=\"1\";}\n  load();\n  if(NF===3&&t.grupo&&t.grupo.fases===3){$(\"ca\").value=t.grupo.p;$(\"cb\").value=t.grupo.s;}\n  build();\n  if(window.obsLoad)obsLoad();\n}\nvar t0=null;\ntry{t0=window.parent&&window.parent!==window?window.parent.TRAFO:null;}catch(e){}\nsetTrafo(t0||{tipo:\"3\",fases:3,v1:13200,v2:220},true);\n\u003c/script\u003e\n\u003c/body\u003e\n\u003c/html\u003e\n"};
+var TIT={H:"Índice horario y cableado",T:"Relación de transformación (TTR / red)",A:"Resistencia de aislamiento",D:"Resistencia de devanados"};
+var ORDER=["H","T","A","D"];
+var NORMAS={H:"Normas aplicables: IEC 60076-1 (grupos de conexión e índice horario)",T:"Normas aplicables: IEC 60076-1 e IEEE C57.12.90 (relación de transformación)",A:"Normas de referencia: IEEE 43 (DAR y PI) y NETA ATS tabla 100.5 (mínimos)",D:"Normas aplicables: IEEE C57.12.90 e IEC 60076-1 (resistencia de devanados)"};
+var INFO_IDS=["ri_cli","ri_dir","ri_nit","ri_tel","ri_resp","ri_marca","ri_tipoeq","ri_ser","ri_kva","ri_ten","ri_obs"];
+var TRS={
+  "3":{tipo:"3",fases:3,v1:13200,v2:220,ca:"D",cb:"Y",nom:"Trifásico",neutroH2:false},
+  "M13":{tipo:"M13",fases:1,v1:13200,v2:220,nom:"Monofásico 13,2 kV",neutroH2:false},
+  "M7":{tipo:"M7",fases:1,v1:7620,v2:127,nom:"Monofásico 7,6 kV",neutroH2:true}
+};
+var tipo="3",sel=["H","T"],repMode=false,frames={},panes={};
+var MODO="manual";try{if(localStorage.getItem("unif_modo")==="auto")MODO="auto";}catch(e){}
+var APP_VERSION={v:"5.0.0",fecha:"2026-11-03"};
+function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+var EMP={nom:"",nit:"",dir:"",tel:"",logo:""};
+function $(id){return document.getElementById(id);}
+try{
+  var st=localStorage.getItem("unif_tipo3");if(st&&TRS[st])tipo=st;
+  var sv=localStorage.getItem("unif_sel3");
+  if(sv){var arr=sv.split("").filter(function(c){return ORDER.indexOf(c)>=0;});if(arr.length)sel=arr;}
+}catch(e){}
+window.TRAFO=TRS[tipo];
+var view=$("view");
+
+/* ---------- grupo de conexión compartido (lo informa Índice horario) ---------- */
+function setGrupo(g){
+  try{TRS[tipo].grupo=g;}catch(e){}
+  ["T","D"].forEach(function(k){try{frames[k].contentWindow.setGrupo(g);}catch(e){}});
+}
+
+function size(f,auto){
+  try{
+    var d=f.contentDocument;
+    if(auto){f.style.height=d.body.offsetHeight+"px";}
+    else{f.style.height=view.clientHeight+"px";}
+  }catch(e){}
+}
+function layoutOne(k){
+  var f=frames[k];
+  if(!f||repMode||sel.indexOf(k)<0)return;
+  size(f,sel.length>1);
+}
+function layout(){ORDER.forEach(layoutOne);}
+function mk(k){
+  var p=document.createElement("div");p.className="pane";
+  var f=document.createElement("iframe");
+  f.title=TIT[k];
+  f.setAttribute("allow","clipboard-write");
+  f.addEventListener("load",function(){
+    layoutOne(k);
+    try{
+      if(window.ResizeObserver){var ro=new ResizeObserver(function(){layoutOne(k);});ro.observe(f.contentDocument.body);}
+    }catch(e){}
+  });
+  f.style.height="600px";
+  f.srcdoc=SRC[k];
+  p.appendChild(f);
+  $("frames").insertBefore(p,$("end"));
+  frames[k]=f;panes[k]=p;
+}
+
+/* ---------- empresa y logo ---------- */
+function saveEmp(){try{localStorage.setItem("unif_emp3",JSON.stringify(EMP));}catch(e){}}
+function previewLogo(){
+  var im=$("emp_prev"),q=$("emp_quit");
+  if(EMP.logo){im.src=EMP.logo;im.style.display="block";q.style.display="inline-block";}
+  else{im.removeAttribute("src");im.style.display="none";q.style.display="none";}
+}
+try{
+  var e0=JSON.parse(localStorage.getItem("unif_emp3")||"null");
+  if(e0){for(var kk in EMP){if(e0[kk]!==undefined)EMP[kk]=e0[kk];}}
+}catch(e){}
+$("emp_nom").value=EMP.nom;$("emp_nit").value=EMP.nit;$("emp_dir").value=EMP.dir;$("emp_tel").value=EMP.tel;previewLogo();
+[["emp_nom","nom"],["emp_nit","nit"],["emp_dir","dir"],["emp_tel","tel"]].forEach(function(p){
+  $(p[0]).addEventListener("input",function(){EMP[p[1]]=$(p[0]).value;saveEmp();if(repMode)buildReport();});
+});
+$("emp_logo").addEventListener("change",function(e){
+  var f=e.target.files&&e.target.files[0];if(!f)return;
+  var rd=new FileReader();
+  rd.onload=function(){
+    var img=new Image();
+    img.onload=function(){
+      var max=320,sc=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement("canvas");
+      c.width=Math.max(1,Math.round(img.width*sc));c.height=Math.max(1,Math.round(img.height*sc));
+      var cx=c.getContext("2d");cx.fillStyle="#fff";cx.fillRect(0,0,c.width,c.height);cx.drawImage(img,0,0,c.width,c.height);
+      EMP.logo=c.toDataURL("image/jpeg",0.85);saveEmp();previewLogo();if(repMode)buildReport();
+    };
+    img.src=rd.result;
+  };
+  rd.readAsDataURL(f);
+});
+$("emp_quit").addEventListener("click",function(){EMP.logo="";$("emp_logo").value="";saveEmp();previewLogo();if(repMode)buildReport();});
+
+/* ---------- informe ---------- */
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+/* Solo se aceptan imágenes embebidas como data URL; nada de rutas ni HTML. */
+var IMG_RE=/^data:image\/(jpeg|jpg|png|webp);base64,[A-Za-z0-9+/=\s]+$/;
+function safeImg(s){return (typeof s==="string"&&s.length<=3000000&&IMG_RE.test(s))?s:"";}
+/* Claves de trabajo que un informe puede restaurar (evita que un JSON escriba cualquier cosa). */
+var LS_ALLOW=/^(ttr2_|aisl2_|dev2_|hobs_|grupo|unif_(info3|sel3|tipo3))/;
+function validRec(rec){
+  if(!rec||typeof rec!=="object"||Array.isArray(rec))return null;
+  if(typeof rec.id!=="string"||!rec.id||rec.id.length>80)return null;
+  if(typeof rec.numero!=="string"||!rec.numero||rec.numero.length>60)return null;
+  if(!rec.ls||typeof rec.ls!=="object"||Array.isArray(rec.ls))return null;
+  var ls={},bytes=0,kn=0,k;
+  for(k in rec.ls){
+    if(!Object.prototype.hasOwnProperty.call(rec.ls,k))continue;
+    if(!LS_ALLOW.test(k))return null;
+    var v=rec.ls[k];
+    if(v!==null&&typeof v!=="string")return null;
+    if(typeof v==="string"){bytes+=v.length;if(v.length>400000)return null;}
+    ls[k]=v;kn++;
+  }
+  if(kn>60||bytes>3000000)return null;
+  var fotos={},tot=0,keys=["H","T","A","D"],f0=(rec.fotos&&typeof rec.fotos==="object")?rec.fotos:{};
+  for(var i=0;i<keys.length;i++){
+    var arr=f0[keys[i]];
+    if(arr===undefined)continue;
+    if(!Array.isArray(arr)||arr.length>24)return null;
+    var out=[];
+    for(var j=0;j<arr.length;j++){
+      var img=safeImg(arr[j]);
+      if(!img)return null;
+      tot+=img.length;if(tot>12000000)return null;
+      out.push(img);
+    }
+    fotos[keys[i]]=out;
+  }
+  var cons=null;
+  if(rec.cons&&typeof rec.cons==="object"){
+    cons={pref:String(rec.cons.pref||"INF-").slice(0,20),code:String(rec.cons.code||"").slice(0,20),n:parseInt(rec.cons.n,10)||1};
+  }
+  return {id:rec.id,numero:rec.numero,cliente:typeof rec.cliente==="string"?rec.cliente.slice(0,200):"",tipo:typeof rec.tipo==="string"?rec.tipo.slice(0,80):"",fecha:typeof rec.fecha==="string"?rec.fecha:new Date().toISOString(),ls:ls,fotos:fotos,cons:cons};
+}
+function fmtBytes(n){
+  if(!isFinite(n)||n<0)return "—";
+  if(n<1024)return n+" B";
+  if(n<1048576)return (n/1024).toFixed(1)+" KB";
+  if(n<1073741824)return (n/1048576).toFixed(1)+" MB";
+  return (n/1073741824).toFixed(2)+" GB";
+}
+function updateStorage(){
+  var el=$("storeinfo");if(!el)return;
+  if(!navigator.storage||!navigator.storage.estimate){el.textContent="";return;}
+  var pers="";
+  var p=(navigator.storage.persisted?navigator.storage.persisted():Promise.resolve(false));
+  Promise.all([navigator.storage.estimate(),p]).then(function(r){
+    var e=r[0]||{},ok=r[1];
+    var pct=e.quota?Math.round(e.usage/e.quota*1000)/10:0;
+    el.textContent="Espacio usado por la app: "+fmtBytes(e.usage)+" de "+fmtBytes(e.quota)+" ("+pct+" %). Datos protegidos: "+(ok?"sí":"no")+".";
+    if(pct>=80)el.textContent+=" Queda poco espacio: exporta un respaldo y borra informes viejos.";
+  }).catch(function(){el.textContent="";});
+}
+function askPersist(){
+  if(!navigator.storage||!navigator.storage.persist)return;
+  navigator.storage.persisted().then(function(already){
+    if(already)return;
+    navigator.storage.persist().then(function(){updateStorage();}).catch(function(){updateStorage();});
+  }).catch(function(){});
+}
+function download(text,name,mime){
+  var blob=new Blob([text],{type:mime||"application/json"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);
+}
+function ymd(){var d=new Date();function p(n){return (n<10?"0":"")+n;}return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());}
+function getRes(k){try{return frames[k].contentWindow.__resumen||"";}catch(e){return "";}}
+function getObs(k){try{return String(frames[k].contentWindow.__obs||"").trim();}catch(e){return "";}}
+function getDatos(k){try{return frames[k].contentWindow.__datos||null;}catch(e){return null;}}
+function getFotos(k){try{return frames[k].contentWindow.__fotos||[];}catch(e){return [];}}
+function cellHtml(c){
+  if(c&&typeof c==="object")return '<td class="'+(c.c||"")+'">'+esc(c.t)+"</td>";
+  var s=c===undefined||c===null?"":String(c);
+  return '<td'+(s.length>28?' class="wrap"':"")+">"+esc(s)+"</td>";
+}
+function tablesHtml(D){
+  var h="";
+  (D.tablas||[]).forEach(function(t){
+    if(!t.filas||!t.filas.length)return;
+    h+='<div class="tt">'+esc(t.titulo||"")+'</div><div class="tw"><table><thead><tr>'+t.cols.map(function(c){return "<th>"+esc(c)+"</th>";}).join("")+"</tr></thead><tbody>"+
+      t.filas.map(function(r){return "<tr>"+r.map(cellHtml).join("")+"</tr>";}).join("")+"</tbody></table></div>";
+  });
+  return h;
+}
+function getFigs(){try{return frames.H.contentWindow.__figs||null;}catch(e){return null;}}
+function parseRes(txt){
+  var lines=String(txt||"").split("\n"),idx=-1;
+  for(var i=lines.length-1;i>=0;i--){if(/^Resultado/i.test(lines[i])){idx=i;break;}}
+  var verdict=idx>=0?lines[idx].replace(/^[^:]*:\s*/,""):"";
+  var body=lines.filter(function(l,j){return j!==idx;}).join("\n").trim();
+  var cls="none",label="Sin datos";
+  if(/FUERA/i.test(verdict)){cls="bad";label="Fuera de tolerancia";}
+  else if(/FALLA/i.test(verdict)){cls="bad";label="FALLA";}
+  else if(/DUDOSO/i.test(verdict)){cls="warn";label="DUDOSO";}
+  else if(/PENDIENTE/i.test(verdict)){cls="pend";label="Pendiente";}
+  else if(/APROBADO/i.test(verdict)){cls="ok";label="APROBADO";}
+  else if(/REGISTRADO/i.test(verdict)){cls="info";label="REGISTRADO";}
+  return {body:body,verdict:verdict,cls:cls,label:label};
+}
+function inf(id){return $(id).value.trim();}
+function kvaText(){var v=inf("ri_kva");if(!v)return "";return /[a-z]/i.test(v)?v:v+" kVA";}
+function buildReport(){
+  var T=TRS[tipo],keys=ORDER.filter(function(k){return sel.indexOf(k)>=0;});
+  var secs=keys.map(function(k){var r=parseRes(getRes(k));r.k=k;r.t=TIT[k];return r;});
+  var ev=secs.filter(function(s){return s.cls==="ok"||s.cls==="warn"||s.cls==="bad";});
+  var nodata=secs.filter(function(s){return s.cls==="none";}).map(function(s){return s.t;});
+  var pendl=secs.filter(function(s){return s.cls==="pend";}).map(function(s){return s.t;});
+  var gcls="none",glab="SIN RESULTADOS";
+  if(ev.some(function(s){return s.cls==="bad";})){gcls="bad";glab="FALLA";}
+  else if(pendl.length){gcls="warn";glab="PENDIENTE";}
+  else if(ev.some(function(s){return s.cls==="warn";})){gcls="warn";glab="DUDOSO";}
+  else if(ev.length){gcls="ok";glab="APROBADO";}
+  var d=new Date(),fecha=d.toLocaleDateString("es")+" "+d.toLocaleTimeString("es",{hour:"2-digit",minute:"2-digit"});
+  var dc=[["N° de informe",consec()],["Fecha",fecha],["Cliente",inf("ri_cli")],["Dirección",inf("ri_dir")],["NIT / Cédula",inf("ri_nit")],["Teléfono",inf("ri_tel")],["Responsable",inf("ri_resp")]].filter(function(x){return x[1];});
+  var de=[["Marca",inf("ri_marca")],["Tipo",$("ri_tipoeq").value],["Serie",inf("ri_ser")],["Potencia",kvaText()],["Tensión",$("ri_ten").value]].filter(function(x){return x[1];});
+  var datos=dc.concat(de);
+  var h="";
+  var lg=safeImg(EMP.logo);
+  if(EMP.nom||lg||EMP.nit||EMP.dir||EMP.tel){
+    h+='<div class="rc"><div class="hdr">'+(lg?'<img src="'+lg+'" alt="Logo">':"")+"<div>"+(EMP.nom?'<div class="en">'+esc(EMP.nom)+"</div>":"")+
+      (EMP.nit?'<div class="kv">NIT: '+esc(EMP.nit)+"</div>":"")+(EMP.dir?'<div class="kv">'+esc(EMP.dir)+"</div>":"")+(EMP.tel?'<div class="kv">Tel: '+esc(EMP.tel)+"</div>":"")+"</div></div></div>";
+  }
+  if(!secs.length)h+='<div class="rc"><div class="kv">Activa al menos una prueba.</div></div>';
+  var kvh=function(x){return '<div class="kv"><b>'+esc(x[0])+":</b> "+esc(x[1])+"</div>";};
+  if(dc.length)h+='<div class="rc"><h3>Datos del cliente</h3>'+dc.map(kvh).join("")+"</div>";
+  if(de.length)h+='<div class="rc"><h3>Datos del equipo</h3>'+de.map(kvh).join("")+"</div>";
+  secs.forEach(function(s){
+    var D=getDatos(s.k),tb=D?tablesHtml(D):"";
+    h+='<div class="rc"><h3><span>'+esc(s.t)+'</span><span class="bd '+s.cls+'">'+esc(s.label)+"</span></h3><div class='norma'>"+esc(NORMAS[s.k])+"</div>"+(tb||"<pre>"+esc(s.body||"Sin datos.")+"</pre>");
+    if(s.k==="H"){
+      var F=getFigs();
+      if(F)h+='<div class="figs"><div class="fig">'+F.wire+'</div><div class="fig">'+F.clock+"</div></div>";
+    }
+    var ob=getObs(s.k);
+    if(ob)h+='<div class="tt">Observaciones</div><div class="obsr">'+esc(ob).replace(/\n/g,"<br>")+"</div>";
+    var fo=getFotos(s.k),fimgs=(fo||[]).map(safeImg).filter(function(x){return !!x;});
+    if(fimgs.length)h+='<div class="tt">Fotos de la prueba</div><div class="fotosr">'+fimgs.map(function(src){return '<img src="'+src+'" alt="Foto de la prueba">';}).join("")+"</div>";
+    h+="</div>";
+  });
+  if(inf("ri_obs"))h+='<div class="rc"><h3>Observaciones</h3><pre>'+esc(inf("ri_obs"))+"</pre></div>";
+  $("repbody").innerHTML=h;
+  $("reptitle").textContent="Informe de pruebas · "+consec();
+  $("repver").textContent="Transformadores v"+APP_VERSION.v+" ("+APP_VERSION.fecha+") · datos guardados solo en este dispositivo";
+  var tx="INFORME DE PRUEBAS DE TRANSFORMADOR\n";
+  var emp=[EMP.nom,EMP.nit?"NIT: "+EMP.nit:"",EMP.dir,EMP.tel?"Tel: "+EMP.tel:""].filter(function(x){return x;});
+  if(emp.length)tx+=emp.join("\n")+"\n";
+  tx+="\n"+datos.map(function(x){return x[0]+": "+x[1];}).join("\n")+"\n";
+  secs.forEach(function(s){var nf=getFotos(s.k).length;tx+="\n== "+s.t+" ["+s.label+"] ==\n"+(s.body||"Sin datos.")+"\n"+(getObs(s.k)?"Observaciones: "+getObs(s.k)+"\n":"")+(nf?"Fotos adjuntas: "+nf+" (se ven en el informe impreso o PDF)\n":"");});
+  if(inf("ri_obs"))tx+="\nObservaciones: "+inf("ri_obs")+"\n";
+  tx+="\nGenerado con Transformadores v"+APP_VERSION.v+" ("+APP_VERSION.fecha+")\n";
+  window.__repText=tx;
+  try{var ij={};INFO_IDS.forEach(function(id){ij[id]=inf(id);});localStorage.setItem("unif_info3",JSON.stringify(ij));}catch(e){}
+}
+
+/* ---------- vista ---------- */
+function render(){
+  try{localStorage.setItem("unif_sel3",sel.join(""));localStorage.setItem("unif_tipo3",tipo);}catch(e){}
+  var tb=document.querySelectorAll("#tipo button");
+  for(var i=0;i<tb.length;i++){tb[i].setAttribute("aria-pressed",tb[i].dataset.t===tipo?"true":"false");}
+  var b=document.querySelectorAll("#seg button");
+  for(var j=0;j<b.length;j++){
+    var k=b[j].dataset.k,on;
+    if(k==="ALL")on=sel.length===ORDER.length;
+    else if(k==="REP")on=repMode;
+    else on=sel.indexOf(k)>=0;
+    b[j].setAttribute("aria-pressed",on?"true":"false");
+  }
+  ORDER.forEach(function(k){panes[k].className="pane"+(sel.indexOf(k)>=0?" on":"");});
+  var mb=document.querySelectorAll("#modo button");
+  for(var q=0;q<mb.length;q++){mb[q].setAttribute("aria-pressed",mb[q].dataset.modo===MODO?"true":"false");}
+  var auto=MODO==="auto";
+  $("frames").style.display=(repMode||auto)?"none":"block";
+  $("rep").style.display=repMode?"block":"none";
+  $("wiz").className=(auto&&!repMode)?"on":"";
+  $("end").style.display=(!repMode&&!auto&&sel.length>1)?"block":"none";
+  if(repMode)buildReport();else if(!auto)layout();
+}
+function toTop(){view.scrollTop=0;}
+
+$("tipo").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  tipo=b.dataset.t;window.TRAFO=TRS[tipo];
+  ORDER.forEach(function(k){try{frames[k].contentWindow.setTrafo(TRS[tipo]);}catch(err){}});
+  render();toTop();
+  WZ.cfg=null;
+  if(MODO==="auto")wzStart();
+});
+$("seg").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  var k=b.dataset.k;
+  if(k==="NEW"){askNew(b);return;}
+  if(k==="REP"){repMode=!repMode;}
+  else if(k==="ALL"){sel=ORDER.slice();}
+  else{
+    var p=sel.indexOf(k);
+    if(p>=0){if(sel.length>1)sel.splice(p,1);}else{sel.push(k);}
+  }
+  render();
+  setTimeout(layout,0);
+  if(k==="REP")toTop();
+  if(MODO==="auto"){if(repMode){WZ.step=-1;}else{wzStart();}}
+});
+$("endbtn").addEventListener("click",function(){repMode=true;render();toTop();});
+window.addEventListener("resize",layout);
+
+INFO_IDS.forEach(function(id){var f=function(){if(repMode)buildReport();};$(id).addEventListener("input",f);$(id).addEventListener("change",f);});
+try{
+  var inf0=JSON.parse(localStorage.getItem("unif_info3")||"null");
+  if(inf0){var LEGK={cli:"ri_cli",marca:"ri_marca",ser:"ri_ser",kva:"ri_kva",resp:"ri_resp",obs:"ri_obs"};Object.keys(LEGK).forEach(function(k){if(inf0[k]!==undefined)$(LEGK[k]).value=inf0[k]||"";});INFO_IDS.forEach(function(id){if(inf0[id]!==undefined)$(id).value=inf0[id]||"";});}
+}catch(e){}
+
+$("r_print").addEventListener("click",function(){try{buildReport();window.print();}catch(e){}});
+/* Ctrl+P o el menú del navegador: asegura que el informe esté armado antes de imprimir. */
+window.addEventListener("beforeprint",function(){try{buildReport();}catch(e){}});
+$("r_copy").addEventListener("click",function(){
+  buildReport();
+  var txt=window.__repText||"",ta=$("r_ta"),b=$("r_copy");
+  function manual(){ta.style.display="block";ta.value=txt;ta.focus();ta.select();b.textContent="Selecciona y copia";}
+  try{navigator.clipboard.writeText(txt).then(function(){b.textContent="Copiado";setTimeout(function(){b.textContent="Copiar";},1500);},manual);}catch(e){manual();}
+});
+$("r_share").addEventListener("click",function(){
+  buildReport();
+  var txt=window.__repText||"",ta=$("r_ta");
+  try{
+    if(navigator.share){navigator.share({title:"Informe de pruebas de transformador",text:txt}).catch(function(){});return;}
+  }catch(e){}
+  ta.style.display="block";ta.value=txt;ta.focus();ta.select();
+});
+
+/* ---------- consecutivo del informe y nuevo trabajo ---------- */
+var CONS={pref:"INF-",code:"",n:1};
+function saveCons(){try{localStorage.setItem("unif_cons3",JSON.stringify(CONS));}catch(e){}}
+try{
+  var c0=JSON.parse(localStorage.getItem("unif_cons3")||"null");
+  if(c0){
+    if(typeof c0.pref==="string")CONS.pref=c0.pref;
+    if(typeof c0.code==="string")CONS.code=c0.code;
+    var nn=parseInt(c0.n,10);if(isFinite(nn)&&nn>=0)CONS.n=nn;
+  }
+}catch(e){}
+function formatCons(n){
+  var s=String(n);while(s.length<4)s="0"+s;
+  return CONS.pref+(CONS.code?CONS.code+"-":"")+s;
+}
+function consec(){
+  var n=parseInt(CONS.n,10);if(!isFinite(n)||n<0)n=1;
+  return formatCons(n);
+}
+function nextFreeNumero(all){
+  var used={};all.forEach(function(r){if(r&&r.numero)used[r.numero]=1;});
+  var n=parseInt(CONS.n,10);if(!isFinite(n)||n<1)n=1;
+  var s;
+  do{s=formatCons(n);n++;}while(used[s]&&n<1000000);
+  CONS.n=n-1;saveCons();
+  return s;
+}
+$("cons_pref").value=CONS.pref;
+$("cons_code").value=CONS.code;
+$("cons_n").value=CONS.n;
+$("cons_pref").addEventListener("input",function(){CONS.pref=$("cons_pref").value;saveCons();if(repMode)buildReport();});
+$("cons_code").addEventListener("input",function(){CONS.code=$("cons_code").value.trim();saveCons();if(repMode)buildReport();});
+$("cons_n").addEventListener("input",function(){
+  var v=parseInt($("cons_n").value,10);
+  CONS.n=isFinite(v)&&v>=0?v:1;saveCons();if(repMode)buildReport();
+});
+function newJob(){
+  try{
+    var del=[];
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k&&(k.indexOf("ttr2_")===0||k.indexOf("aisl2_")===0||k.indexOf("dev2_")===0||k.indexOf("hobs_")===0||k.indexOf("grupo")===0||k==="unif_info3"))del.push(k);
+    }
+    del.forEach(function(k){localStorage.removeItem(k);});localStorage.removeItem("unif_cur_id");
+    var n=parseInt(CONS.n,10);CONS.n=(isFinite(n)?n:0)+1;saveCons();
+  }catch(e){}
+  location.reload();
+}
+function askNew(b){
+  var orig=b.dataset.orig||b.textContent;b.dataset.orig=orig;
+  if(b.dataset.ask==="1"){clearTimeout(b._t);b.dataset.ask="";newJob();return;}
+  b.dataset.ask="1";
+  b.textContent="¿Borrar todo? Toca otra vez";
+  b._t=setTimeout(function(){b.dataset.ask="";b.textContent=orig;},4000);
+}
+$("r_new").addEventListener("click",function(){askNew($("r_new"));});
+
+ORDER.forEach(mk);
+render();
+
+/* ---------- informes guardados en el dispositivo (IndexedDB) ---------- */
+function idbOpen(){return new Promise(function(res,rej){var r=indexedDB.open("unif_informes",1);r.onupgradeneeded=function(){r.result.createObjectStore("informes",{keyPath:"id"});};r.onsuccess=function(){res(r.result);};r.onerror=function(){rej(r.error);};});}
+function idbDo(mode,fn){return idbOpen().then(function(db){return new Promise(function(res,rej){var t=db.transaction("informes",mode),q=fn(t.objectStore("informes"));t.oncomplete=function(){db.close();res(q?q.result:undefined);};t.onerror=function(){db.close();rej(t.error);};t.onabort=function(){db.close();rej(t.error);};});});}
+function jobKeys(){var ks=[];try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&(k.indexOf("ttr2_")===0||k.indexOf("aisl2_")===0||k.indexOf("dev2_")===0||k.indexOf("hobs_")===0||k.indexOf("grupo")===0||k==="unif_info3"||k==="unif_sel3"||k==="unif_tipo3"))ks.push(k);}}catch(e){}return ks;}
+function msgSave(t){var m=$("savemsg");if(m)m.textContent=t;}
+function saveReport(){
+  buildReport();
+  var id=localStorage.getItem("unif_cur_id")||newId();
+  var numero=consec();
+  idbDo("readonly",function(s){return s.getAll();}).then(function(all){
+    all=all||[];
+    var dup=null;
+    for(var i=0;i<all.length;i++){if(all[i].numero===numero&&all[i].id!==id){dup=all[i];break;}}
+    if(dup){
+      var who=dup.cliente?(" de "+dup.cliente):"";
+      if(!window.confirm("El número "+numero+" ya está usado por el informe"+who+".\n\nAceptar: guardar como copia con un número nuevo.\nCancelar: no guardar.")){
+        msgSave("No se guardó: el número "+numero+" ya existe. Cambia el número, abre el informe existente o toca Nuevo trabajo.");
+        return;
+      }
+      numero=nextFreeNumero(all);
+      $("cons_n").value=CONS.n;
+      buildReport();
+    }
+    doSave(id,numero);
+  }).catch(function(){msgSave("No se pudo comprobar la numeración. Revisa el espacio del navegador.");});
+}
+function doSave(id,numero){
+  var ls={};jobKeys().forEach(function(k){ls[k]=localStorage.getItem(k);});
+  var fo={};ORDER.forEach(function(k){fo[k]=getFotos(k).slice();});
+  var rec={id:id,numero:numero,cliente:inf("ri_cli"),tipo:TRS[tipo].nom,fecha:new Date().toISOString(),ls:ls,fotos:fo,cons:{pref:CONS.pref,code:CONS.code,n:CONS.n},app:APP_VERSION.v};
+  idbDo("readwrite",function(s){return s.put(rec);}).then(function(){
+    try{localStorage.setItem("unif_cur_id",id);}catch(e){}
+    msgSave("Informe guardado: "+numero+". Lo encuentras en la lista de abajo.");
+    askPersist();listSaved();
+  }).catch(function(){msgSave("No se pudo guardar. Revisa el espacio disponible del navegador.");});
+}
+function listSaved(){
+  idbDo("readonly",function(s){return s.getAll();}).then(function(all){
+    var box=$("savedList");
+    all.sort(function(a,b){return a.fecha<b.fecha?1:-1;});
+    if(!all.length){box.innerHTML='<div class="kv">Aún no hay informes guardados en este dispositivo.</div>';updateStorage();return;}
+    box.innerHTML=all.map(function(r){
+      return '<div class="kv" style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--border)"><span><b>'+esc(r.numero)+'</b> · '+esc(r.cliente||"sin nombre de cliente")+'<br><small>'+esc(r.tipo)+' · '+esc(new Date(r.fecha).toLocaleString("es"))+'</small></span><span style="display:flex;flex-direction:column;gap:6px"><button type="button" class="act" data-open="'+esc(r.id)+'">Abrir</button> <button type="button" class="act" data-exp="'+esc(r.id)+'">Exportar</button> <button type="button" class="act" data-del="'+esc(r.id)+'">Borrar</button></span></div>';
+    }).join("");
+    updateStorage();
+  }).catch(function(){$("savedList").innerHTML='<div class="kv">No se pudo leer la lista de informes.</div>';});
+}
+function openSaved(id){
+  if(!window.confirm("Abrir este informe reemplaza lo que tienes en pantalla. Si no lo guardaste, se perderá. ¿Continuar?"))return;
+  idbDo("readonly",function(s){return s.get(id);}).then(function(rec){
+    if(!rec){msgSave("No se encontró el informe.");return;}
+    jobKeys().forEach(function(k){localStorage.removeItem(k);});
+    Object.keys(rec.ls||{}).forEach(function(k){
+      if(!LS_ALLOW.test(k))return;
+      if(rec.ls[k]!==null)localStorage.setItem(k,rec.ls[k]);
+    });
+    if(rec.cons)localStorage.setItem("unif_cons3",JSON.stringify(rec.cons));
+    localStorage.setItem("unif_cur_id",rec.id);
+    localStorage.setItem("unif_pending",rec.id);
+    location.reload();
+  }).catch(function(){msgSave("No se pudo abrir el informe.");});
+}
+function exportSaved(id){
+  idbDo("readonly",function(s){return s.get(id);}).then(function(rec){
+    if(!rec){msgSave("No se encontró el informe.");return;}
+    var data=JSON.stringify({formato:"unif-informe",version:1,app:APP_VERSION.v,rec:rec});
+    download(data,(rec.numero||"informe")+"_"+String(rec.cliente||"sin_cliente").replace(/[^A-Za-z0-9]+/g,"_")+".json","application/json");
+    msgSave("Informe exportado: "+(rec.numero||"informe")+". Revisa la carpeta de Descargas.");
+  }).catch(function(){msgSave("No se pudo exportar.");});
+}
+function exportAll(){
+  idbDo("readonly",function(s){return s.getAll();}).then(function(all){
+    if(!all||!all.length){msgSave("No hay informes guardados para exportar.");return;}
+    var data={formato:"unif-respaldo",version:1,app:APP_VERSION.v,generado:new Date().toISOString(),informes:all};
+    var name="transformadores_respaldo_"+ymd()+".json";
+    download(JSON.stringify(data),name,"application/json");
+    msgSave("Respaldo exportado: "+all.length+" informe(s) en "+name+".");
+  }).catch(function(){msgSave("No se pudo exportar el respaldo.");});
+}
+function saveImported(rec,quiet){
+  return idbDo("readwrite",function(s){return s.put(rec);}).then(function(){
+    if(!quiet){msgSave("Informe importado: "+rec.numero+".");listSaved();}
+  }).catch(function(){if(!quiet)msgSave("No se pudo importar.");});
+}
+function importFile(file){
+  if(!file)return;
+  if(file.size>25000000){msgSave("El archivo es demasiado grande (máximo 25 MB).");return;}
+  var rd=new FileReader();
+  rd.onload=function(){
+    var d=null;try{d=JSON.parse(rd.result);}catch(e){}
+    if(!d||typeof d!=="object"){msgSave("El archivo no es un JSON válido.");return;}
+    if(d.formato==="unif-respaldo"&&Array.isArray(d.informes)){
+      var ok=[],bad=0;
+      d.informes.forEach(function(r){var v=validRec(r);if(v)ok.push(v);else bad++;});
+      if(!ok.length){msgSave("El respaldo no trae informes válidos de esta app.");return;}
+      if(!window.confirm("Respaldo con "+ok.length+" informe(s)"+(bad?" ("+bad+" archivo(s) descartado(s))":"")+".\n¿Importarlos a este dispositivo? Los que tengan el mismo identificador se reemplazan."))return;
+      var chain=Promise.resolve();
+      ok.forEach(function(r){chain=chain.then(function(){return saveImported(r,true);});});
+      chain.then(function(){msgSave("Respaldo importado: "+ok.length+" informe(s).");listSaved();})
+           .catch(function(){msgSave("No se pudo importar el respaldo completo.");});
+      return;
+    }
+    var rec=(d.formato==="unif-informe")?validRec(d.rec):null;
+    if(!rec){msgSave("El archivo no corresponde a un informe de esta app o trae datos no válidos.");return;}
+    idbDo("readonly",function(s){return s.get(rec.id);}).then(function(exist){
+      if(exist&&!window.confirm("Ya existe un informe con ese identificador en este dispositivo. ¿Reemplazarlo? Si cancelas, se guarda como copia nueva.")){
+        rec.id=newId();
+      }
+      return saveImported(rec,false);
+    }).catch(function(){msgSave("No se pudo importar.");});
+  };
+  rd.readAsText(file);
+}
+function delSaved(id){
+  if(!window.confirm("¿Borrar este informe guardado? No se puede deshacer."))return;
+  idbDo("readwrite",function(s){return s.delete(id);}).then(function(){
+    if(localStorage.getItem("unif_cur_id")===id)localStorage.removeItem("unif_cur_id");
+    msgSave("Informe borrado.");listSaved();
+  }).catch(function(){msgSave("No se pudo borrar.");});
+}
+$("r_save").addEventListener("click",saveReport);
+$("exp_all").addEventListener("click",exportAll);
+$("imp_btn").addEventListener("click",function(){$("imp_file").click();});
+$("imp_file").addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];if(f)importFile(f);e.target.value="";});
+$("savedList").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  if(b.dataset.open)openSaved(b.dataset.open);
+  else if(b.dataset.exp)exportSaved(b.dataset.exp);
+  else if(b.dataset.del)delSaved(b.dataset.del);
+});
+/* al abrir un informe guardado: recarga y restaura fotos cuando las pruebas estén listas */
+(function(){
+  var pid=null;try{pid=localStorage.getItem("unif_pending");}catch(e){}
+  if(!pid)return;
+  localStorage.removeItem("unif_pending");
+  repMode=true;render();
+  idbDo("readonly",function(s){return s.get(pid);}).then(function(rec){
+    if(!rec)return;
+    var n=0,iv=setInterval(function(){
+      n++;
+      var ready=ORDER.every(function(k){try{return typeof frames[k].contentWindow.__setFotos==="function";}catch(e){return false;}});
+      if(n>200){clearInterval(iv);return;}
+      if(!ready)return;
+      clearInterval(iv);
+      ORDER.forEach(function(k){try{frames[k].contentWindow.__setFotos((rec.fotos&&rec.fotos[k])||[]);}catch(e){}});
+      if(repMode)buildReport();
+      msgSave("Informe abierto: "+rec.numero+".");
+    },100);
+  }).catch(function(){});
+})();
+
+/* =====================================================================
+   MODO AUTOMÁTICO: asistente de captura guiada + OCR local
+   ===================================================================== */
+var WZ={step:-1,queue:[],cfg:null,photo:null,ocrReady:false,ocrLoading:null,worker:null};
+
+function wzd(test){try{return frames[test].contentDocument;}catch(e){return null;}}
+function wzFramesReady(){
+  return ORDER.every(function(k){try{return frames[k]&&frames[k].contentDocument&&typeof frames[k].contentWindow.__setFotos==="function";}catch(e){return false;}});
+}
+function wzWhenReady(cb,n){
+  n=n||0;
+  if(wzFramesReady()||n>120){cb();return;}
+  setTimeout(function(){wzWhenReady(cb,n+1);},50);
+}
+function wzGet(test,id,def){
+  try{var el=wzd(test).getElementById(id);return el?el.value:def;}catch(e){return def;}
+}
+function wzSet(test,id,v){
+  try{
+    var el=wzd(test).getElementById(id);
+    if(el&&String(el.value)!==String(v)){el.value=v;el.dispatchEvent(new Event("change",{bubbles:true}));}
+  }catch(e){}
+}
+function wzUnitA(v){return v==="0.001"?"kΩ":(v==="1000"?"GΩ":"MΩ");}
+function wzUnitD(v){return v==="0.001"?"mΩ":"Ω";}
+function wzClamp(v,a,b){v=parseInt(v,10);if(!isFinite(v))v=a;return Math.max(a,Math.min(b,v));}
+
+function wzCfgFromApp(){
+  var n=wzClamp(wzGet("T","n","5"),1,17);
+  var nom=wzClamp(wzGet("T","nom","1"),1,n);
+  var nat=wzClamp(wzGet("D","nat","1"),1,17);
+  var nbt=wzClamp(wzGet("D","nbt","1"),1,17);
+  return {
+    fases:TRS[tipo].fases,
+    ttrMode:wzGet("T","mode","T"),
+    ttrN:n,ttrNom:nom,
+    aislPrueba:wzGet("A","prueba","P"),
+    aislTipo:wzGet("A","tipo","A"),
+    aislUnit:wzGet("A","unit","1"),
+    devNat:nat,devNbt:nbt,
+    devUnitA:wzGet("D","unit","1"),
+    devUnitB:wzGet("D","unitb","0.001"),
+    ttrScope:"current",ttrCur:nom,
+    devScope:"all",devCurA:1,devCurB:1
+  };
+}
+function wzPositions(cur,n,all){
+  cur=wzClamp(cur,1,n);
+  if(!all)return [cur];
+  var a=[cur];
+  for(var i=1;i<=n;i++){if(i!==cur)a.push(i);}
+  return a;
+}
+function wzACols(pr){
+  if(pr==="D")return [["30","30 s"],["60","1 min"]];
+  if(pr==="I")return [["60","1 min"],["600","10 min"]];
+  if(pr==="E")return [["s0","Paso 1"],["s1","Paso 2"],["s2","Paso 3"],["s3","Paso 4"],["s4","Paso 5"]];
+  if(pr==="R")return [["s0","Punto 1"],["s1","Punto 2"],["s2","Punto 3"],["s3","Punto 4"],["s4","Punto 5"],["s5","Punto 6"]];
+  return [["60","1 min"]];
+}
+function wzBuildQueue(c){
+  var q=[],ph=function(f){return ["A","B","C"][f];};
+  if(sel.indexOf("H")>=0){
+    q.push({test:"H",kind:"photo",label:"Índice horario · foto de la placa de conexión",hint:"Encuadra la placa donde se ve el grupo de conexión y la hora."});
+  }
+  if(sel.indexOf("T")>=0){
+    var ps=wzPositions(c.ttrCur,c.ttrN,c.ttrScope==="all");
+    ps.forEach(function(p){
+      var fs=c.fases===3?[0,1,2]:[0];
+      fs.forEach(function(f){
+        q.push({test:"T",kind:"num",input:"m"+p+"-"+f,unit:c.ttrMode==="T"?"":"V",
+          label:"TTR · Posición "+p+" · "+(c.fases===3?"Bobina "+ph(f):"Lectura"),
+          hint:c.fases===3?"Encuadra la pantalla del TTR con la relación de la bobina "+ph(f)+" y confirma el valor.":"Encuadra la pantalla del TTR con la relación y confirma el valor."});
+      });
+    });
+  }
+  if(sel.indexOf("A")>=0){
+    var pairs=c.fases===3?[0,1,2]:[0];
+    var cols=wzACols(c.aislPrueba);
+    pairs.forEach(function(i){
+      cols.forEach(function(col){
+        q.push({test:"A",kind:"num",input:"m"+i+"-"+col[0],unit:wzUnitA(c.aislUnit),
+          label:"Aislamiento · "+["AT–BT","AT–T","BT–T"][i]+" · "+col[1],
+          hint:"Encuadra la pantalla del megóhmetro con el valor y la unidad visibles."});
+      });
+    });
+  }
+  if(sel.indexOf("D")>=0){
+    var wa=wzPositions(c.devCurA,c.devNat,c.devScope==="all");
+    var wb=wzPositions(c.devCurB,c.devNbt,c.devScope==="all");
+    [["A",wa],["B",wb]].forEach(function(w){
+      w[1].forEach(function(p){
+        var fs=c.fases===3?[0,1,2]:[0];
+        fs.forEach(function(f){
+          q.push({test:"D",kind:"num",input:"d"+w[0]+"-"+(p-1)+"-"+f,unit:w[0]==="A"?wzUnitD(c.devUnitA):wzUnitD(c.devUnitB),
+            label:"Devanados · "+w[0]+" · Posición "+p+" · "+(c.fases===3?"Fase "+ph(f):"Lectura"),
+            hint:"Encuadra la pantalla del microóhmetro con el valor y la unidad visibles."});
+        });
+      });
+    });
+  }
+  return q;
+}
+
+function wzStart(){
+  if(MODO!=="auto"||repMode)return;
+  WZ.step=-1;WZ.queue=[];WZ.photo=null;
+  wzWhenReady(wzRenderConfig);
+}
+function wzHead(txt,prog){
+  $("wzTitle").textContent=txt||"Captura guiada";
+  $("wzProg").textContent=prog||"";
+}
+function wzRenderConfig(){
+  if(MODO!=="auto"||repMode)return;
+  var c=WZ.cfg||wzCfgFromApp(),hasT=sel.indexOf("T")>=0,hasA=sel.indexOf("A")>=0,hasD=sel.indexOf("D")>=0,hasH=sel.indexOf("H")>=0;
+  wzHead("Captura guiada","Configuración");
+  var h='<div class="wz-kick">Modo automático</div><h2>Preparar la captura</h2>';
+  h+='<p class="wz-hint">La app te pedirá cada foto en el orden del formulario, intentará leer el valor y tú lo confirmas antes de pasarlo a la prueba.</p>';
+  h+='<p class="wz-note">Los criterios de aceptación, las tensiones de prueba y los topes se ajustan en modo Manual. El asistente solo llena las lecturas y adjunta la foto a la prueba.</p>';
+  if(!hasT&&!hasA&&!hasD&&!hasH){
+    h+='<div class="wz-card"><p class="wz-hint" style="margin:0">No hay pruebas activas. Elige arriba TTR, Aislamiento o Devanados (o “Todas”).</p></div>';
+  }
+  if(hasT){
+    h+='<div class="wz-card"><h3>TTR</h3><div class="wz-row">'+
+      '<label><input type="radio" name="wzTS" value="current"'+(c.ttrScope!=="all"?" checked":"")+'> Solo la posición actual</label>'+
+      '<label><input type="radio" name="wzTS" value="all"'+(c.ttrScope==="all"?" checked":"")+'> Todas las posiciones</label></div>'+
+      '<div class="wz-row"><label for="wzTCur">Posición actual</label><input id="wzTCur" type="number" min="1" max="'+c.ttrN+'" value="'+c.ttrCur+'">'+
+      '<span class="wz-note">de '+c.ttrN+' configuradas</span></div>'+
+      '<div class="wz-row"><label for="wzTMode">Método</label><select id="wzTMode"><option value="T"'+(c.ttrMode==="T"?" selected":"")+'>TTR (relación por fase)</option><option value="R"'+(c.ttrMode==="R"?" selected":"")+'>Tensión de red</option></select></div></div>';
+  }
+  if(hasA){
+    h+='<div class="wz-card"><h3>Aislamiento (megóhmetro)</h3>'+
+      '<div class="wz-row"><label for="wzAPrueba">Prueba</label><select id="wzAPrueba">'+
+      [["P","Puntual (1 min)"],["D","DAR (30 s y 1 min)"],["I","PI (1 min y 10 min)"],["E","Escalonada"],["R","Rampa"]].map(function(o){return '<option value="'+o[0]+'"'+(c.aislPrueba===o[0]?" selected":"")+'>'+o[1]+'</option>';}).join("")+
+      '</select></div>'+
+      '<div class="wz-row"><label for="wzATipo">Aislamiento</label><select id="wzATipo"><option value="A"'+(c.aislTipo==="A"?" selected":"")+'>Aceite</option><option value="S"'+(c.aislTipo==="S"?" selected":"")+'>Seco</option></select>'+
+      '<label for="wzAUnit">Unidad</label><select id="wzAUnit">'+
+      [["0.001","kΩ"],["1","MΩ"],["1000","GΩ"]].map(function(o){return '<option value="'+o[0]+'"'+(c.aislUnit===o[0]?" selected":"")+'>'+o[1]+'</option>';}).join("")+
+      '</select></div>'+
+      '<p class="wz-note">'+(c.fases===3?"Se piden las tres parejas: AT–BT, AT–T y BT–T.":"Se pide AT–BT.")+(c.aislPrueba==="D"?" En DAR se piden 30 s y 1 min de cada pareja.":(c.aislPrueba==="I"?" En PI se piden 1 min y 10 min de cada pareja.":""))+' Si el equipo cambia de escala (kΩ/MΩ/GΩ), ajústala en cada foto.</p></div>';
+  }
+  if(hasD){
+    h+='<div class="wz-card"><h3>Resistencia de devanados</h3><div class="wz-row">'+
+      '<label><input type="radio" name="wzDS" value="current"'+(c.devScope!=="all"?" checked":"")+'> Solo la posición actual</label>'+
+      '<label><input type="radio" name="wzDS" value="all"'+(c.devScope==="all"?" checked":"")+'> Todas las posiciones</label></div>'+
+      '<div class="wz-row"><label for="wzDCurA">Posición actual AT</label><input id="wzDCurA" type="number" min="1" max="'+c.devNat+'" value="'+c.devCurA+'"><span class="wz-note">de '+c.devNat+'</span></div>'+
+      '<div class="wz-row"><label for="wzDCurB">Posición actual BT</label><input id="wzDCurB" type="number" min="1" max="'+c.devNbt+'" value="'+c.devCurB+'"><span class="wz-note">de '+c.devNbt+'</span></div></div>';
+  }
+  h+='<div class="wz-card"><h3>Lector de fotos</h3><p class="wz-note" style="margin-top:0">OCR local (sin internet). La primera vez tarda unos segundos y descarga unos 7 MB; después funciona sin conexión. Prepara el lector antes de salir a campo.</p><div class="wz-btns"><button type="button" class="act" id="wzPrepBtn">Preparar lector</button></div><div class="wz-status" id="wzPrepMsg">'+(WZ.ocrReady?"Lector listo.":"Lector sin preparar.")+'</div></div>';
+  h+='<div class="wz-btns"><button type="button" class="act main" id="wzGo">Comenzar captura</button><button type="button" class="act" id="wzConfigClose">Cancelar</button></div>';
+  $("wzBody").innerHTML=h;
+  var pb=$("wzPrepBtn");if(pb)pb.addEventListener("click",wzPrepare);
+  var cc=$("wzConfigClose");if(cc)cc.addEventListener("click",function(){setModo("manual");});
+  $("wzGo").addEventListener("click",function(){
+    var ts=document.querySelector('input[name="wzTS"]:checked'),ds=document.querySelector('input[name="wzDS"]:checked');
+    var fresh=wzCfgFromApp();
+    var cc2={
+      fases:fresh.fases,
+      ttrMode:$("wzTMode")?$("wzTMode").value:c.ttrMode,
+      ttrN:fresh.ttrN,
+      ttrScope:ts?ts.value:"current",
+      ttrCur:wzClamp($("wzTCur")?$("wzTCur").value:c.ttrCur,1,fresh.ttrN),
+      aislPrueba:$("wzAPrueba")?$("wzAPrueba").value:c.aislPrueba,
+      aislTipo:$("wzATipo")?$("wzATipo").value:c.aislTipo,
+      aislUnit:$("wzAUnit")?$("wzAUnit").value:c.aislUnit,
+      devNat:fresh.devNat,devNbt:fresh.devNbt,
+      devScope:ds?ds.value:"all",
+      devCurA:wzClamp($("wzDCurA")?$("wzDCurA").value:c.devCurA,1,fresh.devNat),
+      devCurB:wzClamp($("wzDCurB")?$("wzDCurB").value:c.devCurB,1,fresh.devNbt),
+      devUnitA:fresh.devUnitA,devUnitB:fresh.devUnitB
+    };
+    if($("wzTMode"))wzSet("T","mode",cc2.ttrMode);
+    if($("wzAPrueba"))wzSet("A","prueba",cc2.aislPrueba);
+    if($("wzATipo"))wzSet("A","tipo",cc2.aislTipo);
+    if($("wzAUnit"))wzSet("A","unit",cc2.aislUnit);
+    WZ.cfg=cc2;WZ.queue=wzBuildQueue(cc2);WZ.step=0;WZ.photo=null;
+    wzRenderStep();
+  });
+}
+
+function wzRenderStep(){
+  if(MODO!=="auto"||repMode)return;
+  if(WZ.step<0){wzRenderConfig();return;}
+  if(WZ.step>=WZ.queue.length){wzRenderDone();return;}
+  var s=WZ.queue[WZ.step];
+  WZ.photo=s.photo||null;
+  wzHead("Captura guiada",(WZ.step+1)+" / "+WZ.queue.length);
+  var h='<div class="wz-kick">'+esc(TIT[s.test])+'</div><h2>'+esc(s.label)+'</h2><p class="wz-hint">'+esc(s.hint)+'</p>';
+  h+='<div class="wz-btns"><label class="act main">Tomar foto<input id="wzCam" type="file" accept="image/*" capture="environment" hidden></label><label class="act">Galería<input id="wzGal" type="file" accept="image/*" hidden></label></div>';
+  h+='<div class="wz-prev" id="wzPrev"><img id="wzImg" alt="Foto de la lectura"></div>';
+  if(s.kind==="num"){
+    h+='<div class="wz-field" id="wzField"><label for="wzVal">Valor de la lectura'+(s.unit?' ('+esc(s.unit)+')':'')+'</label><input id="wzVal" type="text" inputmode="decimal" autocomplete="off" value="'+(s.value!==undefined?esc(s.value):"")+'"></div>';
+    if(s.unit&&s.unit!=="V"){
+      var uo=(s.unit==="Ω"||s.unit==="mΩ")?[["Ω","Ω"],["mΩ","mΩ"]]:[["kΩ","kΩ"],["MΩ","MΩ"],["GΩ","GΩ"]];
+      var cur=s.srcUnit||s.unit;
+      h+='<div class="wz-row" style="margin-top:8px"><label for="wzSrcUnit">El equipo muestra</label><select id="wzSrcUnit">'+
+        uo.map(function(o){return '<option value="'+o[0]+'"'+(cur===o[0]?" selected":"")+'>'+o[1]+'</option>';}).join("")+
+        '</select><span class="wz-note">Si cambia de escala, ajústala aquí.</span></div>';
+    }
+  }
+  h+='<div class="wz-status" id="wzStatus"></div>';
+  h+='<div class="wz-btns"><button type="button" class="act" id="wzBack">Atrás</button><button type="button" class="act" id="wzSkip">Omitir</button><button type="button" class="act main" id="wzOk">'+(s.kind==="photo"?"Adjuntar y seguir":"Confirmar y seguir")+'</button></div>';
+  $("wzBody").innerHTML=h;
+  if(WZ.photo){$("wzPrev").style.display="block";$("wzImg").src=WZ.photo;}
+  $("wzCam").addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];if(f)wzTakePhoto(f);e.target.value="";});
+  $("wzGal").addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];if(f)wzTakePhoto(f);e.target.value="";});
+  $("wzBack").addEventListener("click",function(){
+    var v=$("wzVal")?$("wzVal").value:null;if(v!==null)s.value=v;
+    if(WZ.step>0){WZ.step--;wzRenderStep();}else{wzRenderConfig();}
+  });
+  $("wzSkip").addEventListener("click",function(){WZ.step++;WZ.photo=null;wzRenderStep();});
+  $("wzOk").addEventListener("click",wzConfirm);
+  var su=$("wzSrcUnit");
+  if(su)su.addEventListener("change",function(){
+    s.srcUnit=su.value;
+    if(s.raw===undefined||s.raw===null)return;
+    var v=(s.unit&&s.unit!=="V")?wzConvert(s.raw,su.value,s.unit):s.raw;
+    if($("wzVal"))$("wzVal").value=wzNum(v);
+    var el=$("wzStatus");
+    if(el)el.innerHTML='Leído: <b>'+wzNum(s.raw)+' '+esc(su.value)+'</b> → <b>'+wzNum(v)+(s.unit?" "+esc(s.unit):"")+'</b>';
+  });
+}
+
+function wzTakePhoto(file){
+  wzStatus("Preparando la foto…");
+  var rd=new FileReader();
+  rd.onload=function(){
+    var img=new Image();
+    img.onload=function(){
+      var max=1600,sc=Math.min(1,max/Math.max(img.width,img.height));
+      var c=document.createElement("canvas");
+      c.width=Math.max(1,Math.round(img.width*sc));c.height=Math.max(1,Math.round(img.height*sc));
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+      var data=c.toDataURL("image/jpeg",0.82);
+      var s=WZ.queue[WZ.step];if(!s)return;
+      s.photo=data;WZ.photo=data;
+      var p=$("wzPrev");if(p){p.style.display="block";$("wzImg").src=data;}
+      if(s.kind==="num")wzOcrStep(s,data);
+      else wzStatus("Foto lista. Toca “Adjuntar y seguir”.");
+    };
+    img.onerror=function(){wzStatus("No se pudo abrir la imagen.");};
+    img.src=rd.result;
+  };
+  rd.readAsDataURL(file);
+}
+
+function wzStatus(txt,cls){
+  var el=$("wzStatus");if(el){el.textContent=txt;el.className="wz-status"+(cls?" "+cls:"");}
+  var p=$("wzPrepMsg");if(p&&!el)p.textContent=txt;
+}
+function wzSay(txt){
+  var el=$("wzStatus");
+  if(el){el.textContent=txt;el.className="wz-status bad";}
+}
+
+/* ---------- OCR local (Tesseract.js) ---------- */
+function wzLoadScript(){
+  if(window.Tesseract)return Promise.resolve();
+  return new Promise(function(res,rej){
+    var s=document.createElement("script");
+    s.src="./ocr/tesseract.min.js";
+    s.onload=function(){res();};
+    s.onerror=function(){rej(new Error("No encontré ./ocr/tesseract.min.js"));};
+    document.head.appendChild(s);
+  });
+}
+function wzOcrInit(){
+  if(WZ.ocrReady)return Promise.resolve(WZ.worker);
+  if(WZ.ocrLoading)return WZ.ocrLoading;
+  if(location.protocol==="file:")return Promise.reject(new Error("El lector no funciona con file://. Abre la app desde la URL publicada o desde un servidor local."));
+  WZ.ocrLoading=wzLoadScript().then(function(){
+    return Promise.all([
+      fetch("./ocr/worker.min.js").then(function(r){if(!r.ok)throw new Error("worker "+r.status);return r.text();}),
+      fetch("./ocr/tesseract-core-simd-lstm.wasm.js").then(function(r){if(!r.ok)throw new Error("core "+r.status);return r.text();})
+    ]);
+  }).then(function(t){
+    var wurl=URL.createObjectURL(new Blob([t[0]],{type:"text/javascript"}));
+    var curl=URL.createObjectURL(new Blob([t[1]],{type:"text/javascript"}))+"#js";
+    return Tesseract.createWorker("eng",1,{
+      workerPath:wurl,
+      corePath:curl,
+      langPath:"./ocr",
+      gzip:true,
+      workerBlobURL:false
+    });
+  }).then(function(w){
+    return w.setParameters({tessedit_char_whitelist:"0123456789.,-",tessedit_pageseg_mode:"7"}).then(function(){
+      WZ.worker=w;WZ.ocrReady=true;return w;
+    });
+  }).catch(function(e){WZ.ocrLoading=null;throw e;});
+  return WZ.ocrLoading;
+}
+/* guarda los archivos del lector en la caché del service worker para usarlo sin internet */
+function wzCacheOcr(){
+  if(!("caches" in window))return Promise.resolve();
+  return caches.keys().then(function(ks){
+    var name=ks.filter(function(k){return k.indexOf("transformadores-pwa-")===0;}).sort().pop()||null;
+    if(!name)return null;
+    return caches.open(name).then(function(c){
+      return c.addAll(["./ocr/tesseract.min.js","./ocr/worker.min.js","./ocr/tesseract-core-simd-lstm.wasm.js"]);
+    });
+  }).catch(function(){});
+}
+function wzPrepare(){
+  wzStatus("Preparando el lector (una sola vez)…");
+  var b=$("wzPrepBtn");if(b){b.disabled=true;b.textContent="Preparando…";}
+  wzCacheOcr().then(function(){return wzOcrInit();}).then(function(){
+    wzStatus("Lector listo. Ya puedes tomar las fotos.");
+    var p=$("wzPrepMsg");if(p)p.textContent="Lector listo.";
+    if(b){b.textContent="Lector listo";}
+  }).catch(function(e){
+    wzStatus("No se pudo preparar el lector: "+(e&&e.message?e.message:e));
+    if(b){b.disabled=false;b.textContent="Reintentar";}
+  });
+}
+function wzPreprocess(dataURL){
+  return new Promise(function(res){
+    var img=new Image();
+    img.onload=function(){
+      var max=1600,sc=Math.min(1,max/Math.max(img.width,img.height));
+      var c=document.createElement("canvas");
+      c.width=Math.max(1,Math.round(img.width*sc));c.height=Math.max(1,Math.round(img.height*sc));
+      var ctx=c.getContext("2d");ctx.drawImage(img,0,0,c.width,c.height);
+      try{
+        var d=ctx.getImageData(0,0,c.width,c.height),a=d.data,sum=0,n=a.length/4;
+        for(var i=0;i<a.length;i+=4)sum+=(a[i]*0.299+a[i+1]*0.587+a[i+2]*0.114);
+        var avg=sum/n,invert=avg<110;
+        for(var j=0;j<a.length;j+=4){
+          var g=a[j]*0.299+a[j+1]*0.587+a[j+2]*0.114;
+          if(invert)g=255-g;
+          g=g<70?0:(g>170?255:g);
+          a[j]=a[j+1]=a[j+2]=g;
+        }
+        ctx.putImageData(d,0,0);
+      }catch(e){}
+      res(c.toDataURL("image/jpeg",0.92));
+    };
+    img.onerror=function(){res(dataURL);};
+    img.src=dataURL;
+  });
+}
+function wzOcr(dataURL){
+  return wzOcrInit().then(function(w){
+    return wzPreprocess(dataURL).then(function(img){return w.recognize(img);});
+  }).then(function(r){
+    return {text:(r&&r.data&&r.data.text||"").trim(),conf:(r&&r.data&&r.data.confidence)||0};
+  });
+}
+function wzParse(txt,unit){
+  var t=String(txt==null?"":txt).replace(/\u2212/g,"-").replace(/\s+/g,"");
+  var m=t.match(/-?\d+(?:[.,]\d+)?/);
+  if(!m)return null;
+  var v=parseFloat(m[0].replace(",","."));
+  if(!isFinite(v))return null;
+  if(!unit||unit==="V")return v;
+  var src=null;
+  if(t.indexOf("GΩ")>=0)src=1e9;
+  else if(t.indexOf("MΩ")>=0)src=1e6;
+  else if(t.indexOf("kΩ")>=0||t.indexOf("KΩ")>=0)src=1e3;
+  else if(t.indexOf("mΩ")>=0)src=1e-3;
+  else if(t.indexOf("Ω")>=0)src=1;
+  var dst=unit==="GΩ"?1e9:unit==="MΩ"?1e6:unit==="kΩ"?1e3:unit==="mΩ"?1e-3:unit==="Ω"?1:null;
+  if(src&&dst)return Math.round(v*src/dst*1e6)/1e6;
+  return Math.round(v*1e6)/1e6;
+}
+function wzFactor(u){return u==="GΩ"?1e9:u==="MΩ"?1e6:u==="kΩ"?1e3:u==="mΩ"?1e-3:u==="Ω"?1:1;}
+function wzConvert(v,from,to){
+  if(!from||!to||from===to)return Math.round(v*1e6)/1e6;
+  return Math.round(v*wzFactor(from)/wzFactor(to)*1e6)/1e6;
+}
+function wzNum(v){return String(Math.round(v*1e6)/1e6);}
+function wzOcrStep(s,data){
+  wzStatus("Leyendo la foto…");
+  return wzOcr(data).then(function(r){
+    if(WZ.queue[WZ.step]!==s)return null;
+    var txt=r.text.replace(/\s+/g," ");
+    var raw=wzParse(txt,"");
+    var f=$("wzField");if(f)f.style.display="block";
+    if(raw===null){
+      wzStatus("No pude leer un número. Escríbelo o repite la foto.",true);
+      return null;
+    }
+    s.raw=raw;
+    var su=$("wzSrcUnit");
+    var src=su?su.value:(s.srcUnit||s.unit);
+    s.srcUnit=src;
+    var v=(s.unit&&s.unit!=="V")?wzConvert(raw,src,s.unit):raw;
+    if($("wzVal"))$("wzVal").value=wzNum(v);
+    var conf=Math.round(r.conf||0);
+    var cls=conf>=75?"ok":(conf>=40?"warn":"bad");
+    if(!conf)cls="warn";
+    var el=$("wzStatus");
+    if(el){
+      el.innerHTML='Leído: <b>'+wzNum(raw)+(s.unit&&s.unit!=="V"?' '+esc(src):"")+'</b> → <b>'+wzNum(v)+(s.unit?" "+esc(s.unit):"")+'</b> <span class="wz-badge '+cls+'">'+(conf?("confianza "+conf+"%"):"confianza baja")+'</span> — confirma o corrige.';
+    }
+    return v;
+  }).catch(function(e){
+    var el=$("wzStatus");
+    if(el)el.innerHTML='Lector no preparado. <button type="button" class="act" id="wzPrep2">Preparar lector</button>';
+    var b=$("wzPrep2");if(b)b.addEventListener("click",wzPrepare);
+    return null;
+  });
+}
+function wzConfirm(){
+  var s=WZ.queue[WZ.step];if(!s)return;
+  if(s.kind==="num"){
+    var raw=$("wzVal")?$("wzVal").value.trim():"";
+    if(!raw){wzSay("Escribe o confirma el valor antes de continuar.");return;}
+    var v=parseFloat(String(raw).replace(",","."));
+    if(!isFinite(v)){wzSay("El valor no es un número válido.");return;}
+    var el=null;try{el=wzd(s.test).getElementById(s.input);}catch(e){}
+    if(!el){wzSay("No encontré el campo en la prueba. Revisa la configuración.");return;}
+    el.value=wzNum(v);el.dispatchEvent(new Event("input",{bubbles:true}));
+    s.value=wzNum(v);
+  }
+  if(s.photo){
+    try{
+      var w=frames[s.test].contentWindow;
+      var arr=(w.__fotos||[]).slice();arr.push(s.photo);
+      if(typeof w.__setFotos==="function")w.__setFotos(arr);
+    }catch(e){}
+  }
+  WZ.step++;WZ.photo=null;wzRenderStep();
+}
+function wzRenderDone(){
+  wzHead("Captura guiada","Listo");
+  var n=WZ.queue.filter(function(s){return !!s.photo;}).length;
+  $("wzBody").innerHTML='<div class="wz-kick">Captura terminada</div><h2>'+n+' foto(s) en '+WZ.queue.length+' paso(s)</h2>'+
+    '<p class="wz-hint">Los valores confirmados ya están en cada prueba. Revisa el informe antes de guardarlo.</p>'+
+    '<div class="wz-btns"><button type="button" class="act main" id="wzRep">Ver informe</button><button type="button" class="act" id="wzAgain">Volver a la app</button></div>';
+  $("wzRep").addEventListener("click",function(){repMode=true;render();toTop();});
+  $("wzAgain").addEventListener("click",function(){setModo("manual");});
+}
+function setModo(m){
+  MODO=m;
+  try{localStorage.setItem("unif_modo",m);}catch(e){}
+  if(m==="auto"){repMode=false;WZ.cfg=null;wzStart();}
+  else{WZ.step=-1;}
+  render();
+}
+function initModo(){
+  var mb=document.querySelectorAll("#modo button");
+  for(var i=0;i<mb.length;i++){
+    mb[i].addEventListener("click",function(){setModo(this.dataset.modo);});
+  }
+  $("wzClose").addEventListener("click",function(){setModo("manual");});
+  if(MODO==="auto")wzWhenReady(wzStart);
+  render();
+}
+/* ganchos de prueba */
+window.__wzTestPhoto=function(dataURL){var s=WZ.queue[WZ.step];if(!s)return "sin paso";s.photo=dataURL;WZ.photo=dataURL;var p=$("wzPrev");if(p){p.style.display="block";$("wzImg").src=dataURL;}return s.kind==="num"?wzOcrStep(s,dataURL):"ok";};
+window.__wzState=function(){return {modo:MODO,step:WZ.step,n:WZ.queue.length,label:WZ.queue[WZ.step]&&WZ.queue[WZ.step].label,cfg:WZ.cfg,ocr:WZ.ocrReady};};
+
+listSaved();
+initModo();
+
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("./service-worker.js").catch(function () {});
+  });
+}
+</script>
+</body>
+</html>
