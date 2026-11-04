@@ -8,7 +8,7 @@ Aplicación web para registrar y documentar pruebas de transformadores en campo:
 - **Resistencia de devanados** (corrección por temperatura, desbalance y comparación con fábrica).
 - **Informe** con datos de empresa y cliente, tablas, gráficos, fotos, observaciones, impresión a PDF y exportación JSON.
 
-Versión actual: **5.0.4** (2026-11-04).
+Versión actual: **5.0.5** (2026-11-04).
 
 - App publicada: <https://jeydiaza-ui.github.io/pruebas-electricas-v5/>
 - Repositorio: <https://github.com/jeydiaza-ui/pruebas-electricas-v5>
@@ -72,7 +72,7 @@ No hay servidor, cuenta ni nube. Si se borran los datos del sitio, se cambia de 
 ```
 index.html                 aplicación completa (4 pruebas embebidas + asistente)
 manifest.json              manifiesto PWA
-service-worker.js          caché y funcionamiento sin internet (v5.0.4)
+service-worker.js          caché y funcionamiento sin internet (v5.0.5)
 icon-192.png / icon-512.png            iconos normales
 icon-maskable-192.png / -512.png       iconos para Android (zona segura)
 ocr/tesseract.min.js                   lector OCR (interfaz)
@@ -88,7 +88,7 @@ CHANGELOG.md
 El sitio se publica con **GitHub Pages** desde la rama `main` (raíz del repositorio).
 
 1. Cambia `APP_VERSION` en `index.html` y el texto visible `#ver` / `#repver`.
-2. Sube `CACHE_NAME` en `service-worker.js` con la misma versión y fecha (por ejemplo `transformadores-pwa-v5.0.4-2026-11-04`).
+2. Sube `CACHE_NAME` en `service-worker.js` con la misma versión y fecha (por ejemplo `transformadores-pwa-v5.0.5-2026-11-04`).
 3. Actualiza `CHANGELOG.md`.
 4. Sube **todos** los archivos, incluida la carpeta `ocr/`.
 5. Haz commit y push a `main`. GitHub Pages publica en 1–2 minutos.

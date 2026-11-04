@@ -1,7 +1,7 @@
-/* Pruebas de Transformadores — service worker v5.0.4 (2026-11-04)
+/* Pruebas de Transformadores — service worker v5.0.5 (2026-11-04)
    Estrategia: primero la red (para recibir versiones nuevas) y, sin internet,
    la copia guardada. Solo se guardan respuestas del mismo origen. */
-const CACHE_NAME = "transformadores-pwa-v5.0.4-2026-11-04";
+const CACHE_NAME = "transformadores-pwa-v5.0.5-2026-11-04";
 const APP_SHELL = [
   "./",
   "./index.html",

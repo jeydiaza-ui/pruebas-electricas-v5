@@ -1,5 +1,10 @@
 # Cambios
 
+## v5.0.5 — 2026-11-04
+
+- **Vista previa de fotos corregida:** el visor ahora está al nivel de la página, así se ve también al tocar una foto desde el formulario en modo Manual (antes podía quedar detrás de la vista).
+- Caché `transformadores-pwa-v5.0.5-2026-11-04` y versión visible 5.0.5.
+
 ## v5.0.4 — 2026-11-04
 
 - **Vista previa de fotos:** toca una foto (en el formulario, en el asistente o en el informe) para verla completa; × o tocar fuera para cerrar.

@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="app-version" content="5.0.4">
+  <meta name="app-version" content="5.0.5">
   <meta name="description" content="Pruebas de transformadores: índice horario, TTR, aislamiento, resistencia de devanados e informe con fotos.">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png" sizes="192x192">
@@ -204,7 +204,7 @@ iframe{display:block;width:100%;border:0;background:transparent}
       <button type="button" data-modo="manual" aria-pressed="true">Manual</button>
       <button type="button" data-modo="auto" aria-pressed="false">Automático (fotos guiadas)</button>
     </div>
-    <div id="ver">v5.0.4 · 2026-11-04</div>
+    <div id="ver">v5.0.5 · 2026-11-04</div>
   </div>
   <div id="view">
     <div id="frames">
@@ -260,11 +260,6 @@ iframe{display:block;width:100%;border:0;background:transparent}
           </div>
         </div>
         <div id="repbody"></div>
-<div id="fotoPrev" role="dialog" aria-modal="true" aria-label="Vista previa de la foto">
-  <button type="button" id="fotoPrevX" aria-label="Cerrar">×</button>
-  <img id="fotoPrevImg" alt="Vista previa de la foto">
-  <div class="cap">Toca fuera o × para cerrar</div>
-</div>
         <p class="note" id="repver"></p>
         <div class="btnrow nop">
           <button type="button" class="act" id="r_share">Compartir</button>
@@ -293,6 +288,11 @@ iframe{display:block;width:100%;border:0;background:transparent}
     <div class="wz-body" id="wzBody"></div>
   </div>
 </div>
+<div id="fotoPrev" role="dialog" aria-modal="true" aria-label="Vista previa de la foto">
+  <button type="button" id="fotoPrevX" aria-label="Cerrar">×</button>
+  <img id="fotoPrevImg" alt="Vista previa de la foto">
+  <div class="cap">Toca fuera o × para cerrar</div>
+</div>
 <script>
 /* almacenamiento propio de la v5: no comparte claves con la v4 */
 var LS=(function(){var P="v5_",S=window["local"+"Storage"];function all(){var a=[];try{for(var i=0;i<S.length;i++){var k=S.key(i);if(k&&k.indexOf(P)===0)a.push(k.slice(P.length));}}catch(e){}return a;}return {getItem:function(k){try{return S.getItem(P+k);}catch(e){return null;}},setItem:function(k,v){try{S.setItem(P+k,v);}catch(e){}},removeItem:function(k){try{S.removeItem(P+k);}catch(e){}},key:function(i){var a=all();return (i>=0&&i<a.length)?a[i]:null;},get length(){return all().length;}};})();
@@ -309,7 +309,7 @@ var TRS={
 };
 var tipo="3",sel=["H","T"],repMode=false,frames={},panes={};
 var MODO="manual";try{if(LS.getItem("unif_modo")==="auto")MODO="auto";}catch(e){}
-var APP_VERSION={v:"5.0.4",fecha:"2026-11-04"};
+var APP_VERSION={v:"5.0.5",fecha:"2026-11-04"};
 function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 var EMP={nom:"",nit:"",dir:"",tel:"",logo:""};
 function $(id){return document.getElementById(id);}
