@@ -8,7 +8,7 @@ Aplicación web para registrar y documentar pruebas de transformadores en campo:
 - **Resistencia de devanados** (corrección por temperatura, desbalance y comparación con fábrica).
 - **Informe** con datos de empresa y cliente, tablas, gráficos, fotos, observaciones, impresión a PDF y exportación JSON.
 
-Versión actual: **5.0.3** (2026-11-04).
+Versión actual: **5.0.4** (2026-11-04).
 
 - App publicada: <https://jeydiaza-ui.github.io/pruebas-electricas-v5/>
 - Repositorio: <https://github.com/jeydiaza-ui/pruebas-electricas-v5>
@@ -33,7 +33,8 @@ El asistente pide cada foto en el orden del formulario, intenta leer el valor y 
 4. La app pide: Índice horario (placa) → TTR (posición actual A/B/C y luego las demás posiciones sin repetir) → aislamiento (AT–BT, AT–T, BT–T con sus tiempos) → devanados (AT y BT por posición).
 5. En cada foto puedes confirmar el valor, corregirlo o cambiarlo de unidad si el equipo cambió de escala.
 6. Si una foto quedó mal, usa **Quitar foto** o la × de las miniaturas **“Fotos montadas en esta prueba”**; puedes tomar otra sin duplicarla.
-7. Al final, **Ver informe**.
+7. Toca una foto (en el formulario, en el asistente o en el informe) para verla completa; × o tocar fuera para cerrar.
+8. Al final, **Ver informe**.
 
 ## Lector de fotos (OCR local)
 
@@ -71,7 +72,7 @@ No hay servidor, cuenta ni nube. Si se borran los datos del sitio, se cambia de 
 ```
 index.html                 aplicación completa (4 pruebas embebidas + asistente)
 manifest.json              manifiesto PWA
-service-worker.js          caché y funcionamiento sin internet (v5.0.3)
+service-worker.js          caché y funcionamiento sin internet (v5.0.4)
 icon-192.png / icon-512.png            iconos normales
 icon-maskable-192.png / -512.png       iconos para Android (zona segura)
 ocr/tesseract.min.js                   lector OCR (interfaz)
@@ -87,7 +88,7 @@ CHANGELOG.md
 El sitio se publica con **GitHub Pages** desde la rama `main` (raíz del repositorio).
 
 1. Cambia `APP_VERSION` en `index.html` y el texto visible `#ver` / `#repver`.
-2. Sube `CACHE_NAME` en `service-worker.js` con la misma versión y fecha (por ejemplo `transformadores-pwa-v5.0.3-2026-11-04`).
+2. Sube `CACHE_NAME` en `service-worker.js` con la misma versión y fecha (por ejemplo `transformadores-pwa-v5.0.4-2026-11-04`).
 3. Actualiza `CHANGELOG.md`.
 4. Sube **todos** los archivos, incluida la carpeta `ocr/`.
 5. Haz commit y push a `main`. GitHub Pages publica en 1–2 minutos.

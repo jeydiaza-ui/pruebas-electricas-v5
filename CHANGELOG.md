@@ -1,5 +1,14 @@
 # Cambios
 
+## v5.0.4 — 2026-11-04
+
+- **Vista previa de fotos:** toca una foto (en el formulario, en el asistente o en el informe) para verla completa; × o tocar fuera para cerrar.
+- **Exportar JSON con las fotos actuales:** al exportar un informe abierto, el JSON incluye las fotos y lecturas que tengas en pantalla aunque no hayas vuelto a guardar.
+- **Importar y abrir:** al importar un informe individual, la app ofrece abrirlo para modificarlo.
+- Límites ampliados: 30 fotos por prueba, 4 MB por foto, 20 MB por informe y 60 MB por archivo JSON.
+- Nota en el formulario: las fotos se guardan al guardar el informe.
+- Caché `transformadores-pwa-v5.0.4-2026-11-04` y versión visible 5.0.4.
+
 ## v5.0.3 — 2026-11-04
 
 - **Quitar o cambiar fotos en el modo automático.** En cada paso aparece **Quitar foto** y una tira de **“Fotos montadas en esta prueba”** con una × en cada miniatura.
