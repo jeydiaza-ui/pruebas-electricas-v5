@@ -8,7 +8,7 @@ Aplicación web para registrar y documentar pruebas de transformadores en campo:
 - **Resistencia de devanados** (corrección por temperatura, desbalance y comparación con fábrica).
 - **Informe** con datos de empresa y cliente, tablas, gráficos, fotos, observaciones, impresión a PDF y exportación JSON.
 
-Versión actual: **5.0.0** (2026-11-03).
+Versión actual: **5.0.1** (2026-11-03).
 
 - App publicada: <https://jeydiaza-ui.github.io/pruebas-electricas-v5/>
 - Repositorio: <https://github.com/jeydiaza-ui/pruebas-electricas-v5>
@@ -43,6 +43,15 @@ El asistente pide cada foto en el orden del formulario, intenta leer el valor y 
 - La primera preparación necesita internet. Después funciona sin conexión (archivos en la caché y datos del idioma en IndexedDB).
 - **No funciona abriendo el archivo con doble clic (`file://`)**: usa la URL publicada o un servidor local.
 
+## Datos separados de la versión 4
+
+La v5 **no comparte los informes ni las claves con la v4**, aunque las dos estén en `jeydiaza-ui.github.io`:
+
+- La v5 guarda en claves con prefijo `v5_` (por ejemplo `v5_ttr2_3`) y en una base propia `unif_informes_v5`.
+- La v4 sigue usando sus claves y `unif_informes`. Abrir o guardar en una no cambia la otra.
+- Para pasar un informe de la v4 a la v5: en la v4 usa **Exportar** (o **Exportar todo**) y en la v5 usa **Importar informe o respaldo**. La importación traduce las claves a `v5_`.
+- Borrar los datos del sitio en el navegador borra las dos versiones, porque comparten el origen; mantén respaldos.
+
 ## Dónde quedan los datos
 
 Todo se guarda **solo en el navegador de ese dispositivo**:
@@ -61,7 +70,7 @@ No hay servidor, cuenta ni nube. Si se borran los datos del sitio, se cambia de 
 ```
 index.html                 aplicación completa (4 pruebas embebidas + asistente)
 manifest.json              manifiesto PWA
-service-worker.js          caché y funcionamiento sin internet (v5.0.0)
+service-worker.js          caché y funcionamiento sin internet (v5.0.1)
 icon-192.png / icon-512.png            iconos normales
 icon-maskable-192.png / -512.png       iconos para Android (zona segura)
 ocr/tesseract.min.js                   lector OCR (interfaz)

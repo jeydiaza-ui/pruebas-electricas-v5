@@ -1,5 +1,11 @@
 # Cambios
 
+## v5.0.1 — 2026-11-03
+
+- **Almacenamiento separado de la v4.** La v5 usa claves con prefijo `v5_` y su propia base `unif_informes_v5`; ya no muestra ni modifica los informes de la v4.
+- Los informes de la v4 se pueden pasar a la v5 con **Exportar** en la v4 e **Importar** en la v5 (la importación traduce las claves).
+- Caché `transformadores-pwa-v5.0.1-2026-11-03` y versión visible 5.0.1.
+
 ## v5.0.0 — 2026-11-03
 
 Base: v4.0.0 (2026-10-26).
