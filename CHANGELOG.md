@@ -1,5 +1,11 @@
 # Cambios
 
+## v5.1.4 — 2026-11-04
+
+- **Descripciones fijas en el informe** antes de TTR, Aislamiento y Devanados, con el texto largo del informe de referencia; no son editables y no aparecen en la pantalla de llenado.
+- **Descripción de fotos manuales:** debajo de cada foto montada hay un campo para escribir, por ejemplo, “Bobina A U–W, Tap 1”; se guarda y sale debajo de la foto en el informe.
+- Caché `transformadores-pwa-v5.1.4-2026-11-04` y versión visible 5.1.4.
+
 ## v5.1.3 — 2026-11-04
 
 - **Fotos más compactas en el informe:** 3 columnas y recuadros más pequeños, con el nombre debajo (TTR, aislamiento, devanados).
