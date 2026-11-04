@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="app-version" content="5.0.5">
+  <meta name="app-version" content="5.0.6">
   <meta name="description" content="Pruebas de transformadores: índice horario, TTR, aislamiento, resistencia de devanados e informe con fotos.">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png" sizes="192x192">
@@ -97,7 +97,8 @@ iframe{display:block;width:100%;border:0;background:transparent}
 .tw td.bad{background:var(--bad-bg);color:var(--bad);font-weight:700}
 .tw td.wrap{white-space:normal;text-align:left;min-width:160px}
 .fotosr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.fotosr img{width:100%;border-radius:8px;border:1px solid var(--border);display:block}
+.fotofig{margin:0;border:1px solid var(--border);border-radius:8px;background:#fff;height:190px;display:flex;align-items:center;justify-content:center;overflow:hidden;break-inside:avoid;page-break-inside:avoid}
+.fotofig img{width:100%;height:100%;object-fit:contain;display:block;border:0;border-radius:0}
 #fotoPrev{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.93);display:none;align-items:center;justify-content:center;padding:16px;touch-action:none}
 #fotoPrev img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;background:#000}
 #fotoPrev button{position:absolute;top:10px;right:10px;width:44px;height:44px;border-radius:22px;border:0;background:rgba(255,255,255,.18);color:#fff;font-size:26px;line-height:1;cursor:pointer}
@@ -110,8 +111,9 @@ iframe{display:block;width:100%;border:0;background:transparent}
   .tw th{background:#eee}
   .tw td.ok{background:#dff3e6;color:#0b5d2f}
   .tw td.bad{background:#fbe3e0;color:#8a1a12}
-  .fotosr{grid-template-columns:repeat(3,1fr)}
-  .fotosr img{break-inside:avoid}
+  .fotosr{grid-template-columns:repeat(2,1fr)}
+  .fotofig{height:58mm;break-inside:avoid;page-break-inside:avoid}
+  .fotofig img{width:100%;height:100%;object-fit:contain}
 }
 @media print{
   #bar,#frames,#end,.nop{display:none!important}
@@ -204,7 +206,7 @@ iframe{display:block;width:100%;border:0;background:transparent}
       <button type="button" data-modo="manual" aria-pressed="true">Manual</button>
       <button type="button" data-modo="auto" aria-pressed="false">Automático (fotos guiadas)</button>
     </div>
-    <div id="ver">v5.0.5 · 2026-11-04</div>
+    <div id="ver">v5.0.6 · 2026-11-04</div>
   </div>
   <div id="view">
     <div id="frames">
@@ -309,7 +311,7 @@ var TRS={
 };
 var tipo="3",sel=["H","T"],repMode=false,frames={},panes={};
 var MODO="manual";try{if(LS.getItem("unif_modo")==="auto")MODO="auto";}catch(e){}
-var APP_VERSION={v:"5.0.5",fecha:"2026-11-04"};
+var APP_VERSION={v:"5.0.6",fecha:"2026-11-04"};
 function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 var EMP={nom:"",nit:"",dir:"",tel:"",logo:""};
 function $(id){return document.getElementById(id);}
@@ -535,7 +537,7 @@ function buildReport(){
     var ob=getObs(s.k);
     if(ob)h+='<div class="tt">Observaciones</div><div class="obsr">'+esc(ob).replace(/\n/g,"<br>")+"</div>";
     var fo=getFotos(s.k),fimgs=(fo||[]).map(safeImg).filter(function(x){return !!x;});
-    if(fimgs.length)h+='<div class="tt">Fotos de la prueba</div><div class="fotosr">'+fimgs.map(function(src){return '<img src="'+src+'" alt="Foto de la prueba">';}).join("")+"</div>";
+    if(fimgs.length)h+='<div class="tt">Fotos de la prueba</div><div class="fotosr">'+fimgs.map(function(src){return '<figure class="fotofig"><img src="'+src+'" alt="Foto de la prueba"></figure>';}).join("")+"</div>";
     h+="</div>";
   });
   if(inf("ri_obs"))h+='<div class="rc"><h3>Observaciones</h3><pre>'+esc(inf("ri_obs"))+"</pre></div>";

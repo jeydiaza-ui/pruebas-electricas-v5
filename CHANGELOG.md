@@ -1,5 +1,11 @@
 # Cambios
 
+## v5.0.6 — 2026-11-04
+
+- **Fotos del informe alineadas al imprimir:** cada foto va en un recuadro de tamaño fijo, con la imagen completa y sin recortes; se evita que una foto se parta entre dos páginas.
+- Se imprimen en **2 columnas** (antes 3), con separación uniforme; las fotos verticales y horizontales quedan parejas.
+- Caché `transformadores-pwa-v5.0.6-2026-11-04` y versión visible 5.0.6.
+
 ## v5.0.5 — 2026-11-04
 
 - **Vista previa de fotos corregida:** el visor ahora está al nivel de la página, así se ve también al tocar una foto desde el formulario en modo Manual (antes podía quedar detrás de la vista).
