@@ -1,5 +1,12 @@
 # Cambios
 
+## v5.1.3 — 2026-11-04
+
+- **Fotos más compactas en el informe:** 3 columnas y recuadros más pequeños, con el nombre debajo (TTR, aislamiento, devanados).
+- **Etiquetas automáticas:** TTR con bobina, par de conexión y tap; devanados con AT/BT, fase y posición.
+- **Aceite:** los resultados editables se ven en amarillo y las referencias quedan fijas; se quitó la tabla redundante “Documento” para evitar una hoja en blanco.
+- Caché `transformadores-pwa-v5.1.3-2026-11-04` y versión visible 5.1.3.
+
 ## v5.1.2 — 2026-11-04
 
 - **Botón Informe visible en cualquier ancho de PC:** la barra de pruebas se acomoda en varias filas, incluso con la ventana a media pantalla; ya no queda oculto el último botón.
