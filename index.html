@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="app-version" content="5.0.2">
+  <meta name="app-version" content="5.0.3">
   <meta name="description" content="Pruebas de transformadores: índice horario, TTR, aislamiento, resistencia de devanados e informe con fotos.">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png" sizes="192x192">
@@ -154,6 +154,10 @@ iframe{display:block;width:100%;border:0;background:transparent}
 .wz-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .wz-btns .act{flex:1 1 40%}
 .wz-btns label.act{display:flex;align-items:center;justify-content:center;cursor:pointer}
+.wz-thumbs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
+.wz-thumb{position:relative;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#000}
+.wz-thumb img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover}
+.wz-thumb button{position:absolute;top:2px;right:2px;width:26px;height:26px;border:0;border-radius:13px;background:rgba(0,0,0,.72);color:#fff;font-size:16px;line-height:1;cursor:pointer;padding:0}
 .wz-prev{display:none;margin:10px 0 0;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#111}
 .wz-prev img{display:block;width:100%;height:auto}
 .wz-field{margin-top:12px}
@@ -196,7 +200,7 @@ iframe{display:block;width:100%;border:0;background:transparent}
       <button type="button" data-modo="manual" aria-pressed="true">Manual</button>
       <button type="button" data-modo="auto" aria-pressed="false">Automático (fotos guiadas)</button>
     </div>
-    <div id="ver">v5.0.2 · 2026-11-04</div>
+    <div id="ver">v5.0.3 · 2026-11-04</div>
   </div>
   <div id="view">
     <div id="frames">
@@ -296,7 +300,7 @@ var TRS={
 };
 var tipo="3",sel=["H","T"],repMode=false,frames={},panes={};
 var MODO="manual";try{if(LS.getItem("unif_modo")==="auto")MODO="auto";}catch(e){}
-var APP_VERSION={v:"5.0.2",fecha:"2026-11-04"};
+var APP_VERSION={v:"5.0.3",fecha:"2026-11-04"};
 function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 var EMP={nom:"",nit:"",dir:"",tel:"",logo:""};
 function $(id){return document.getElementById(id);}
@@ -1052,7 +1056,7 @@ function wzRenderStep(){
   WZ.photo=s.photo||null;
   wzHead("Captura guiada",(WZ.step+1)+" / "+WZ.queue.length);
   var h='<div class="wz-kick">'+esc(TIT[s.test])+'</div><h2>'+esc(s.label)+'</h2><p class="wz-hint">'+esc(s.hint)+'</p>';
-  h+='<div class="wz-btns"><label class="act main">Tomar foto<input id="wzCam" type="file" accept="image/*" capture="environment" hidden></label><label class="act">Galería<input id="wzGal" type="file" accept="image/*" hidden></label></div>';
+  h+='<div class="wz-btns"><label class="act main">Tomar foto<input id="wzCam" type="file" accept="image/*" capture="environment" hidden></label><label class="act">Galería<input id="wzGal" type="file" accept="image/*" hidden></label>'+(s.photo?'<button type="button" class="act" id="wzDel">Quitar foto</button>':"")+'</div>';
   h+='<div class="wz-prev" id="wzPrev"><img id="wzImg" alt="Foto de la lectura"></div>';
   if(s.kind==="num"){
     h+='<div class="wz-field" id="wzField"><label for="wzVal">Valor de la lectura'+(s.unit?' ('+esc(s.unit)+')':'')+'</label><input id="wzVal" type="text" inputmode="decimal" autocomplete="off" value="'+(s.value!==undefined?esc(s.value):"")+'"></div>';
@@ -1066,6 +1070,12 @@ function wzRenderStep(){
   }
   h+='<div class="wz-status" id="wzStatus"></div>';
   h+='<div class="wz-row" id="wzCands" style="margin-top:6px;gap:6px"></div>';
+  var mine=[];WZ.queue.forEach(function(it,ix){if(it.test===s.test&&it.photo)mine.push({i:ix,p:it.photo});});
+  if(mine.length){
+    h+='<div class="wz-note">Fotos montadas en esta prueba: '+mine.length+'</div><div class="wz-thumbs" id="wzThumbs">';
+    mine.forEach(function(x){h+='<div class="wz-thumb"><img src="'+x.p+'" alt="Foto montada"><button type="button" data-rm="'+x.i+'" aria-label="Quitar esta foto">×</button></div>';});
+    h+='</div>';
+  }
   h+='<div class="wz-btns"><button type="button" class="act" id="wzBack">Atrás</button><button type="button" class="act" id="wzSkip">Omitir</button><button type="button" class="act main" id="wzOk">'+(s.kind==="photo"?"Adjuntar y seguir":"Confirmar y seguir")+'</button></div>';
   $("wzBody").innerHTML=h;
   if(WZ.photo){$("wzPrev").style.display="block";$("wzImg").src=WZ.photo;}
@@ -1077,6 +1087,10 @@ function wzRenderStep(){
   });
   $("wzSkip").addEventListener("click",function(){WZ.step++;WZ.photo=null;wzRenderStep();});
   $("wzOk").addEventListener("click",wzConfirm);
+  var delBtn=$("wzDel");
+  if(delBtn)delBtn.addEventListener("click",function(){wzDropPhoto(WZ.step);});
+  var rms=document.querySelectorAll("[data-rm]");
+  for(var ri=0;ri<rms.length;ri++){rms[ri].addEventListener("click",function(){wzDropPhoto(parseInt(this.dataset.rm,10));});}
   var su=$("wzSrcUnit");
   if(su)su.addEventListener("change",function(){
     s.srcUnit=su.value;
@@ -1102,6 +1116,7 @@ function wzTakePhoto(file){
       var data=c.toDataURL("image/jpeg",0.82);
       var s=WZ.queue[WZ.step];if(!s)return;
       s.photo=data;WZ.photo=data;
+      wzSyncPhotos(s.test);
       var p=$("wzPrev");if(p){p.style.display="block";$("wzImg").src=data;}
       if(s.kind==="num")wzOcrStep(s,data);
       else wzStatus("Foto lista. Toca “Adjuntar y seguir”.");
@@ -1112,6 +1127,23 @@ function wzTakePhoto(file){
   rd.readAsDataURL(file);
 }
 
+function wzSyncPhotos(test){
+  try{
+    var w=frames[test].contentWindow,arr=[];
+    WZ.queue.forEach(function(it){if(it.test===test&&it.photo)arr.push(it.photo);});
+    if(w&&typeof w.__setFotos==="function")w.__setFotos(arr);
+  }catch(e){}
+}
+function wzDropPhoto(idx){
+  var it=WZ.queue[idx];if(!it)return;
+  var cur=WZ.queue[WZ.step];
+  if(cur&&$("wzVal"))cur.value=$("wzVal").value;
+  it.photo=null;
+  if(it===cur){WZ.photo=null;it.raw=null;it.nums=null;}
+  wzSyncPhotos(it.test);
+  wzRenderStep();
+  if(it===cur)wzStatus("Foto quitada. Toma otra o escribe el valor.");
+}
 function wzStatus(txt,cls){
   var el=$("wzStatus");if(el){el.textContent=txt;el.className="wz-status"+(cls?" "+cls:"");}
   var p=$("wzPrepMsg");if(p&&!el)p.textContent=txt;
@@ -1353,13 +1385,7 @@ function wzConfirm(){
     el.value=wzNum(v);el.dispatchEvent(new Event("input",{bubbles:true}));
     s.value=wzNum(v);
   }
-  if(s.photo){
-    try{
-      var w=frames[s.test].contentWindow;
-      var arr=(w.__fotos||[]).slice();arr.push(s.photo);
-      if(typeof w.__setFotos==="function")w.__setFotos(arr);
-    }catch(e){}
-  }
+  wzSyncPhotos(s.test);
   WZ.step++;WZ.photo=null;wzRenderStep();
 }
 function wzRenderDone(){

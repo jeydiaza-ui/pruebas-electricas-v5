@@ -1,5 +1,12 @@
 # Cambios
 
+## v5.0.3 — 2026-11-04
+
+- **Quitar o cambiar fotos en el modo automático.** En cada paso aparece **Quitar foto** y una tira de **“Fotos montadas en esta prueba”** con una × en cada miniatura.
+- Al quitar una foto se elimina de la prueba (no queda duplicada), se puede tomar otra y el valor ya escrito se conserva.
+- Al volver atrás y confirmar de nuevo, las fotos se sincronizan: nunca se duplican.
+- Caché `transformadores-pwa-v5.0.3-2026-11-04` y versión visible 5.0.3.
+
 ## v5.0.2 — 2026-11-04
 
 - **El informe ya no mezcla posiciones viejas.** Al tocar **Comenzar captura**, el asistente borra las lecturas y fotos actuales de las pruebas seleccionadas (pide confirmación si hay datos). Así, si se elige “solo la posición actual”, el informe muestra únicamente esa posición, aunque antes hubiera lecturas de otras posiciones o fotos acumuladas.
