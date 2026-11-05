@@ -1,5 +1,11 @@
 # Cambios
 
+## v5.1.6 — 2026-11-05
+
+- **Cliente guardado de inmediato:** al escribir el cliente se guarda solo, aunque no guardes el informe; al dar **Trabajo nuevo** el cliente sigue disponible en el selector.
+- **Foto de la placa en la misma hoja del índice:** la foto se acomoda junto a los diagramas del índice horario, sin saltar a la hoja siguiente.
+- Caché `transformadores-pwa-v5.1.6-2026-11-05` y versión visible 5.1.6.
+
 ## v5.1.5 — 2026-11-04
 
 - **Color en los resultados de AFQ y PCB dentro del informe:** la columna de resultados se imprime en amarillo y las referencias quedan sin color, con la leyenda “Resultados en amarillo · referencias fijas”.

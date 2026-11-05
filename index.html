@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="app-version" content="5.1.5">
+  <meta name="app-version" content="5.1.6">
   <meta name="description" content="Pruebas de transformadores: índice horario, TTR, aislamiento, resistencia de devanados e informe con fotos.">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png" sizes="192x192">
@@ -89,8 +89,11 @@ iframe{display:block;width:100%;border:0;background:transparent}
 .rc.gen .big{font-size:22px;font-weight:700}
 .rc.gen.ok .big{color:var(--ok)} .rc.gen.bad .big{color:var(--bad)} .rc.gen.warn .big{color:var(--warn)}
 .figs{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
+.figs3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .fig{background:#fff;border-radius:10px;padding:8px;border:1px solid var(--border)}
 .fig svg{display:block;width:100%;height:auto;max-width:420px;margin:0 auto}
+.fig img{display:block;width:100%;max-height:55mm;object-fit:contain;margin:0 auto}
+.figcap{font-size:9px;line-height:1.15;text-align:center;color:var(--ts);margin-top:3px}
 .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0}
 .btnrow .act{flex:1 1 30%}
 #r_ta{display:none;width:100%;height:140px;font:12px monospace;margin-top:8px}
@@ -150,6 +153,10 @@ iframe{display:block;width:100%;border:0;background:transparent}
   .tt{break-after:avoid}
   .rc pre,.rc .kv,.hdr .en{color:#000}
   .figs{grid-template-columns:1fr 1fr}
+  .figs3{grid-template-columns:repeat(3,1fr)}
+  .figs3 .fig{padding:4px}
+  .figs3 .fig img{max-height:48mm}
+  .figs3 .fig svg{max-width:100%}
   .fig,.hdr img{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 .norma{font-size:12.5px;color:var(--ts);margin:0 0 8px;break-after:avoid;page-break-after:avoid}
@@ -229,7 +236,7 @@ iframe{display:block;width:100%;border:0;background:transparent}
       <button type="button" data-modo="manual" aria-pressed="true">Manual</button>
       <button type="button" data-modo="auto" aria-pressed="false">Automático (fotos guiadas)</button>
     </div>
-    <div id="ver">v5.1.5 · 2026-11-04</div>
+    <div id="ver">v5.1.6 · 2026-11-04</div>
   </div>
   <div id="view">
     <div id="frames">
@@ -335,7 +342,7 @@ var TRS={
 };
 var tipo="3",sel=["H","T"],repMode=false,frames={},panes={};
 var MODO="manual";try{if(LS.getItem("unif_modo")==="auto")MODO="auto";}catch(e){}
-var APP_VERSION={v:"5.1.5",fecha:"2026-11-04"};
+var APP_VERSION={v:"5.1.6",fecha:"2026-11-04"};
 function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 var EMP={nom:"",nit:"",dir:"",tel:"",logo:""};
 function $(id){return document.getElementById(id);}
@@ -612,15 +619,22 @@ function buildReport(){
         }
       });
     }
+    var hPhotoInline=false;
     if(s.k==="H"){
-      var F=getFigs();
-      if(F)h+='<div class="figs"><div class="fig">'+F.wire+'</div><div class="fig">'+F.clock+"</div></div>";
+      var F=getFigs(),hfo=getFotos("H"),hfl=getFotoLabels("H");
+      var hpairs=(hfo||[]).map(function(src,i){return {src:safeImg(src),lab:(hfl[i]||("Foto "+(i+1)))};}).filter(function(x){return !!x.src;});
+      if(F){
+        h+='<div class="figs'+(hpairs.length?' figs3':'')+'"><div class="fig">'+F.wire+'</div><div class="fig">'+F.clock+"</div>";
+        hpairs.forEach(function(x){h+='<div class="fig"><img src="'+x.src+'" alt="Foto"><div class="figcap">'+esc(x.lab)+"</div></div>";});
+        h+="</div>";
+        hPhotoInline=!!hpairs.length;
+      }
     }
     var ob=getObs(s.k);
     if(ob)h+='<div class="tt">Observaciones</div><div class="obsr">'+esc(ob).replace(/\n/g,"<br>")+"</div>";
     var fo=getFotos(s.k),fl=getFotoLabels(s.k);
     var fpairs=(fo||[]).map(function(src,i){return {src:safeImg(src),lab:(fl[i]||("Foto "+(i+1)))};}).filter(function(x){return !!x.src;});
-    if(fpairs.length)h+='<div class="tt">Fotos de la prueba</div><div class="fotosr">'+fpairs.map(function(x){return '<figure class="fotofig"><img src="'+x.src+'" alt="Foto"><figcaption>'+esc(x.lab)+'</figcaption></figure>';}).join("")+"</div>";
+    if(fpairs.length&&!hPhotoInline)h+='<div class="tt">Fotos de la prueba</div><div class="fotosr">'+fpairs.map(function(x){return '<figure class="fotofig"><img src="'+x.src+'" alt="Foto"><figcaption>'+esc(x.lab)+'</figcaption></figure>';}).join("")+"</div>";
     h+="</div>";
   });
   if(inf("ri_obs"))h+='<div class="rc"><h3>Observaciones</h3><pre>'+esc(inf("ri_obs"))+"</pre></div>";
@@ -752,7 +766,18 @@ $("cons_n").addEventListener("input",function(){
   var v=parseInt($("cons_n").value,10);
   CONS.n=isFinite(v)&&v>=0?v:1;saveCons();if(repMode)buildReport();
 });
+function guardarClienteActual(){
+  try{
+    var nom=inf("ri_cli").trim();if(!nom)return;
+    var nit=inf("ri_nit").trim();
+    var key=nom.toLowerCase()+"|"+nit.toLowerCase();
+    var m={};try{m=JSON.parse(LS.getItem("unif_clientes3")||"{}");}catch(e){}
+    m[key]={nom:nom,nit:nit,dir:inf("ri_dir"),tel:inf("ri_tel"),resp:inf("ri_resp"),fecha:new Date().toISOString()};
+    LS.setItem("unif_clientes3",JSON.stringify(m));
+  }catch(e){}
+}
 function newJob(){
+  guardarClienteActual();
   try{
     var del=[];
     for(var i=0;i<LS.length;i++){
@@ -803,6 +828,7 @@ function saveReport(){
   }).catch(function(){msgSave("No se pudo comprobar la numeración. Revisa el espacio del navegador.");});
 }
 function doSave(id,numero){
+  guardarClienteActual();
   var ls={};jobKeys().forEach(function(k){ls[k]=LS.getItem(k);});
   var fo={};ORDER.forEach(function(k){fo[k]=getFotos(k).slice();});
   var fl={};ORDER.forEach(function(k){fl[k]=getFotoLabels(k).slice();});
@@ -816,15 +842,9 @@ function doSave(id,numero){
 function refreshClientes(){
   var sel=$("cli_pick");if(!sel)return;
   var prev=sel.value;
-  idbDo("readonly",function(s){return s.getAll();}).then(function(all){
-    var map={};
-    (all||[]).slice().sort(function(a,b){return (a.fecha||"")<(b.fecha||"")?-1:1;}).forEach(function(r){
-      var f={};try{f=JSON.parse((r.ls&&r.ls.unif_info3)||"null")||{};}catch(e){}
-      var nom=String(f.ri_cli||r.cliente||"").trim();if(!nom)return;
-      var nit=String(f.ri_nit||"").trim();
-      var key=nom.toLowerCase()+"|"+nit.toLowerCase();
-      map[key]={nom:nom,nit:nit,dir:f.ri_dir||"",tel:f.ri_tel||"",resp:f.ri_resp||""};
-    });
+  var map={};
+  try{var book=JSON.parse(LS.getItem("unif_clientes3")||"{}");Object.keys(book).forEach(function(k){map[k]=book[k];});}catch(e){}
+  function paint(){
     window.__CLIENTES=map;
     var keys=Object.keys(map).sort(function(a,b){return map[a].nom.localeCompare(map[b].nom);});
     sel.innerHTML='<option value="">— Nuevo cliente —</option>'+keys.map(function(k){var c=map[k];return '<option value="'+encodeURIComponent(k)+'">'+esc(c.nom)+(c.nit?" · "+esc(c.nit):"")+'</option>';}).join("");
@@ -835,6 +855,17 @@ function refreshClientes(){
       var found=keys.filter(function(k){return map[k].nom.toLowerCase()===cur;})[0];
       if(found)sel.value=encodeURIComponent(found);
     }
+  }
+  paint();
+  idbDo("readonly",function(s){return s.getAll();}).then(function(all){
+    (all||[]).slice().sort(function(a,b){return (a.fecha||"")<(b.fecha||"")?-1:1;}).forEach(function(r){
+      var f={};try{f=JSON.parse((r.ls&&r.ls.unif_info3)||"null")||{};}catch(e){}
+      var nom=String(f.ri_cli||r.cliente||"").trim();if(!nom)return;
+      var nit=String(f.ri_nit||"").trim();
+      var key=nom.toLowerCase()+"|"+nit.toLowerCase();
+      map[key]={nom:nom,nit:nit,dir:f.ri_dir||"",tel:f.ri_tel||"",resp:f.ri_resp||""};
+    });
+    paint();
   }).catch(function(){});
 }
 function listSaved(){
@@ -934,6 +965,13 @@ function delSaved(id){
   }).catch(function(){msgSave("No se pudo borrar.");});
 }
 $("r_save").addEventListener("click",saveReport);
+var cliTimer=null;
+["ri_cli","ri_dir","ri_nit","ri_tel","ri_resp"].forEach(function(id){
+  var e=$(id);if(!e)return;
+  function saveCli(){clearTimeout(cliTimer);cliTimer=setTimeout(guardarClienteActual,500);}
+  e.addEventListener("input",saveCli);e.addEventListener("change",saveCli);
+});
+window.addEventListener("beforeunload",guardarClienteActual);
 $("cli_pick").addEventListener("change",function(){
   var key=this.value?decodeURIComponent(this.value):"";
   var c=window.__CLIENTES&&window.__CLIENTES[key];
