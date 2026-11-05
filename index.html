@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="app-version" content="5.1.6">
+  <meta name="app-version" content="5.1.7">
   <meta name="description" content="Pruebas de transformadores: índice horario, TTR, aislamiento, resistencia de devanados e informe con fotos.">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png" sizes="192x192">
@@ -236,7 +236,7 @@ iframe{display:block;width:100%;border:0;background:transparent}
       <button type="button" data-modo="manual" aria-pressed="true">Manual</button>
       <button type="button" data-modo="auto" aria-pressed="false">Automático (fotos guiadas)</button>
     </div>
-    <div id="ver">v5.1.6 · 2026-11-04</div>
+    <div id="ver">v5.1.7 · 2026-11-04</div>
   </div>
   <div id="view">
     <div id="frames">
@@ -342,7 +342,7 @@ var TRS={
 };
 var tipo="3",sel=["H","T"],repMode=false,frames={},panes={};
 var MODO="manual";try{if(LS.getItem("unif_modo")==="auto")MODO="auto";}catch(e){}
-var APP_VERSION={v:"5.1.6",fecha:"2026-11-04"};
+var APP_VERSION={v:"5.1.7",fecha:"2026-11-04"};
 function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 var EMP={nom:"",nit:"",dir:"",tel:"",logo:""};
 function $(id){return document.getElementById(id);}
@@ -774,11 +774,24 @@ function guardarClienteActual(){
     var m={};try{m=JSON.parse(LS.getItem("unif_clientes3")||"{}");}catch(e){}
     m[key]={nom:nom,nit:nit,dir:inf("ri_dir"),tel:inf("ri_tel"),resp:inf("ri_resp"),fecha:new Date().toISOString()};
     LS.setItem("unif_clientes3",JSON.stringify(m));
+    LS.setItem("unif_cliente_last",key);
+  }catch(e){}
+}
+function aplicarUltimoCliente(){
+  if(LS.getItem("unif_nuevo")!=="1")return;
+  LS.removeItem("unif_nuevo");
+  try{
+    var key=LS.getItem("unif_cliente_last");if(!key)return;
+    var m=JSON.parse(LS.getItem("unif_clientes3")||"{}"),c=m[key];if(!c)return;
+    function set(id,v){var e=$(id);if(!e)return;e.value=v||"";e.dispatchEvent(new Event("input",{bubbles:true}));}
+    set("ri_cli",c.nom);set("ri_dir",c.dir);set("ri_nit",c.nit);set("ri_tel",c.tel);set("ri_resp",c.resp);
+    var sel=$("cli_pick");if(sel)sel.value=encodeURIComponent(key);
   }catch(e){}
 }
 function newJob(){
   guardarClienteActual();
   try{
+    LS.setItem("unif_nuevo","1");
     var del=[];
     for(var i=0;i<LS.length;i++){
       var k=LS.key(i);
@@ -974,9 +987,10 @@ var cliTimer=null;
 window.addEventListener("beforeunload",guardarClienteActual);
 $("cli_pick").addEventListener("change",function(){
   var key=this.value?decodeURIComponent(this.value):"";
+  function set(id,v){var e=$(id);if(!e)return;e.value=v||"";e.dispatchEvent(new Event("input",{bubbles:true}));}
+  if(!key){["ri_cli","ri_dir","ri_nit","ri_tel","ri_resp"].forEach(function(id){set(id,"");});return;}
   var c=window.__CLIENTES&&window.__CLIENTES[key];
   if(!c)return;
-  function set(id,v){var e=$(id);if(!e)return;e.value=v||"";e.dispatchEvent(new Event("input",{bubbles:true}));}
   set("ri_cli",c.nom);set("ri_dir",c.dir);set("ri_nit",c.nit);set("ri_tel",c.tel);set("ri_resp",c.resp);
 });
 $("exp_all").addEventListener("click",exportAll);
@@ -1611,6 +1625,7 @@ document.addEventListener("keydown",function(e){if(e.key==="Escape")closeFoto();
 window.addEventListener("message",function(e){if(e.data&&e.data.tipo==="foto")openFoto(e.data.src);});
 $("repbody").addEventListener("click",function(e){if(e.target&&e.target.tagName==="IMG"&&(e.target.closest(".fotosr")||e.target.closest(".pdfpages")))openFoto(e.target.src);});
 initModo();
+aplicarUltimoCliente();
 
 </script>
 <script>

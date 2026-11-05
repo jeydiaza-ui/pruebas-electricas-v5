@@ -1,5 +1,11 @@
 # Cambios
 
+## v5.1.7 — 2026-11-05
+
+- **Trabajo nuevo carga el último cliente:** al confirmar Trabajo nuevo, el formulario aparece con los datos del último cliente usado y el selector lo muestra; también queda disponible para cambiarlo.
+- **“Nuevo cliente” limpia los datos** del cliente anterior para empezar de cero.
+- Caché `transformadores-pwa-v5.1.7-2026-11-05` y versión visible 5.1.7.
+
 ## v5.1.6 — 2026-11-05
 
 - **Cliente guardado de inmediato:** al escribir el cliente se guarda solo, aunque no guardes el informe; al dar **Trabajo nuevo** el cliente sigue disponible en el selector.
