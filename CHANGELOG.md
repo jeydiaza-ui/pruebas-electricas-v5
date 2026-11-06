@@ -1,5 +1,14 @@
 # Cambios
 
+## v5.2.0 — 2026-11-06
+
+- **Encabezado y pie en el PDF:** logo en todas las hojas; desde la segunda, número de informe y cliente; pie con `diazaingenieria@gmail.com` y “Página X de Y”. En el diálogo de impresión hay que desactivar “Encabezados y pies de página”.
+- **Fotos ordenadas:** 2 centradas, 3 en una fila, 4 en dos filas, 5 en 3+2 y 6 en 3+3. El grupo no se parte entre hojas.
+- **Datos de AFQ/PCB más compactos:** la tabla de datos de la muestra usa dos pares dato/valor por fila.
+- **Fotos adicionales al final:** en manual y automático, con descripción, guardadas en el informe y en el JSON.
+- Los informes ya guardados siguen abriendo igual; las fotos adicionales son opcionales.
+- Caché `transformadores-pwa-v5.2.0-2026-11-06` y versión visible 5.2.0.
+
 ## v5.1.7 — 2026-11-05
 
 - **Trabajo nuevo carga el último cliente:** al confirmar Trabajo nuevo, el formulario aparece con los datos del último cliente usado y el selector lo muestra; también queda disponible para cambiarlo.

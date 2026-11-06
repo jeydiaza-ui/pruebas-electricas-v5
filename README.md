@@ -9,7 +9,7 @@ Aplicación web para registrar y documentar pruebas de transformadores en campo:
 - **Pruebas de aceite AFQ y PCB** (PDF de laboratorio convertido a imágenes o formato propio).
 - **Informe** con datos del cliente y del equipo, tablas, fotos, observaciones, impresión a PDF y exportación JSON.
 
-Versión actual: **5.1.7** (2026-11-05).
+Versión actual: **5.2.0** (2026-11-06).
 
 - App publicada: <https://jeydiaza-ui.github.io/v2/>
 - Repositorio: <https://github.com/jeydiaza-ui/v2>
