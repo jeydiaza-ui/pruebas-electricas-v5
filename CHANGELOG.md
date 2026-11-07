@@ -1,5 +1,10 @@
 # Cambios
 
+## v5.2.1 — 2026-11-06
+
+- **Las tablas de las pruebas ya no saltan completas a la hoja siguiente:** usan el espacio disponible y continúan en la hoja siguiente, repitiendo el encabezado de columnas. Las filas no se cortan y las fotos siguen agrupadas sin partirse.
+- Caché `transformadores-pwa-v5.2.1-2026-11-06` y versión visible 5.2.1.
+
 ## v5.2.0 — 2026-11-06
 
 - **Encabezado y pie en el PDF:** logo en todas las hojas; desde la segunda, número de informe y cliente; pie con `diazaingenieria@gmail.com` y “Página X de Y”. En el diálogo de impresión hay que desactivar “Encabezados y pies de página”.
