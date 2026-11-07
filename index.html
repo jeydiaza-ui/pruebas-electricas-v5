@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="app-version" content="5.2.2">
+  <meta name="app-version" content="5.2.3">
   <meta name="description" content="Pruebas de transformadores: índice horario, TTR, aislamiento, resistencia de devanados e informe con fotos.">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png" sizes="192x192">
@@ -141,11 +141,16 @@ iframe{display:block;width:100%;border:0;background:transparent}
   .tw td.ok{background:#dff3e6;color:#0b5d2f}
   .tw td.bad{background:#fbe3e0;color:#8a1a12}
   .fotosr{gap:6px}
+  .fotosr.n6 .fotofig{height:44mm}
+  .fotosr.n6 .fotofig img{height:34mm}
   .fotofig{height:48mm;break-inside:avoid;page-break-inside:avoid}
   .fotofig img{width:100%;height:38mm;object-fit:contain}
   .fotofig figcaption{font-size:7px;line-height:1.1;padding:1mm;max-height:8mm;background:#f2f2f2}
   .rc{padding:8px 10px;margin:0 0 8px}
   .rc.keep{break-inside:avoid;page-break-inside:avoid}
+  .rc.pagebreak{break-before:page;page-break-before:always}
+  .rc.oilsec .tw table{font-size:9px}
+  .rc.oilsec .tw th,.rc.oilsec .tw td{padding:2px 3px}
   .testdesc{background:#f7f7f7;border-color:#888;font-size:8.5px;padding:6px 8px;margin:4px 0 8px;break-inside:avoid;page-break-inside:avoid}
   .pdfpages img{max-height:245mm}
 }
@@ -249,7 +254,7 @@ iframe{display:block;width:100%;border:0;background:transparent}
       <button type="button" data-modo="manual" aria-pressed="true">Manual</button>
       <button type="button" data-modo="auto" aria-pressed="false">Automático (fotos guiadas)</button>
     </div>
-    <div id="ver">v5.2.2 · 2026-11-06</div>
+    <div id="ver">v5.2.3 · 2026-11-06</div>
   </div>
   <div id="view">
     <div id="frames">
@@ -364,7 +369,7 @@ var TRS={
 };
 var tipo="3",sel=["H","T"],repMode=false,frames={},panes={};
 var MODO="manual";try{if(LS.getItem("unif_modo")==="auto")MODO="auto";}catch(e){}
-var APP_VERSION={v:"5.2.2",fecha:"2026-11-06"};
+var APP_VERSION={v:"5.2.3",fecha:"2026-11-06"};
 function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 var EMP={nom:"",nit:"",dir:"",tel:"",logo:""};
 function $(id){return document.getElementById(id);}
@@ -699,10 +704,11 @@ function buildReport(){
   var kvh=function(x){return '<div class="kv"><b>'+esc(x[0])+":</b> "+esc(x[1])+"</div>";};
   if(dc.length)h+='<div class="rc"><h3>Datos del cliente</h3>'+dc.map(kvh).join("")+"</div>";
   if(de.length)h+='<div class="rc"><h3>Datos del equipo</h3>'+de.map(kvh).join("")+"</div>";
-  secs.forEach(function(s){
+  secs.forEach(function(s,idx){
     var D=getDatos(s.k),tb=D?tablesHtml(D):"";
     if(s.k==="O"&&tb&&!Object.keys(getPdfs("O")).length)tb='<div class="oillegend">Resultados en amarillo · referencias fijas</div>'+tb;
-    h+='<div class="rc'+(s.k==="D"?" keep":"")+'"><h3><span>'+esc(s.t)+'</span><span class="bd '+s.cls+'">'+esc(s.label)+"</span></h3><div class='norma'>"+esc(NORMAS[s.k])+"</div>"+(TEST_DESC[s.k]?'<div class="testdesc">'+TEST_DESC[s.k]+'</div>':'')+(tb||"<pre>"+esc(s.body||"Sin datos.")+"</pre>");
+    var scls="rc"+(idx>0?" pagebreak":"")+(s.k==="D"?" keep":"")+(s.k==="O"?" oilsec":"");
+    h+='<div class="'+scls+'"><h3><span>'+esc(s.t)+'</span><span class="bd '+s.cls+'">'+esc(s.label)+"</span></h3><div class='norma'>"+esc(NORMAS[s.k])+"</div>"+(TEST_DESC[s.k]?'<div class="testdesc">'+TEST_DESC[s.k]+'</div>':'')+(tb||"<pre>"+esc(s.body||"Sin datos.")+"</pre>");
     if(s.k==="O"){
       var PP=getPdfs("O");
       ["AFQ","PCB"].forEach(function(a){
@@ -734,7 +740,7 @@ function buildReport(){
   if(inf("ri_obs"))h+='<div class="rc"><h3>Observaciones</h3><pre>'+esc(inf("ri_obs"))+"</pre></div>";
   if(EXTRA.length){
     var nx=Math.min(EXTRA.length,6);
-    h+='<div class="rc"><h3>Fotos adicionales</h3><div class="fotosr n'+nx+'">'+EXTRA.map(function(x){return '<figure class="fotofig"><img src="'+x.src+'" alt="Foto adicional"><figcaption>'+esc(x.label||"")+'</figcaption></figure>';}).join("")+"</div></div>";
+    h+='<div class="rc pagebreak"><h3>Fotos adicionales</h3><div class="fotosr n'+nx+'">'+EXTRA.map(function(x){return '<figure class="fotofig"><img src="'+x.src+'" alt="Foto adicional"><figcaption>'+esc(x.label||"")+'</figcaption></figure>';}).join("")+"</div></div>";
   }
   $("repbody").innerHTML=h;
   $("reptitle").textContent="Informe de pruebas · "+consec();

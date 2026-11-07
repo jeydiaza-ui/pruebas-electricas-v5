@@ -1,5 +1,12 @@
 # Cambios
 
+## v5.2.3 — 2026-11-07
+
+- **Una sección por hoja:** hoja 1 índice/cliente/equipo; hoja 2 TTR con sus fotos; hoja 3 Devanados con sus fotos; hoja 4 AFQ/PCB; fotos adicionales solas al final.
+- **Devanados completo:** si cabe, queda completo en su hoja; si hay más posiciones y no cabe, puede ocupar dos o más hojas de la misma sección.
+- **Fotos de 6 reducidas** para que quepan completas en la hoja de Devanados.
+- Caché `transformadores-pwa-v5.2.3-2026-11-07` y versión visible 5.2.3.
+
 ## v5.2.2 — 2026-11-06
 
 - **La prueba de Resistencia de devanados no se parte entre hojas:** si no cabe completa en el espacio que queda, baja entera a la hoja siguiente (tablas AT y BT, fotos y descripción juntas). Se aplica siempre, no solo a un informe concreto.
