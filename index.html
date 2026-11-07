@@ -7,7 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="app-version" content="5.2.1">
+  <meta name="app-version" content="5.2.2">
   <meta name="description" content="Pruebas de transformadores: índice horario, TTR, aislamiento, resistencia de devanados e informe con fotos.">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png" sizes="192x192">
@@ -145,6 +145,7 @@ iframe{display:block;width:100%;border:0;background:transparent}
   .fotofig img{width:100%;height:38mm;object-fit:contain}
   .fotofig figcaption{font-size:7px;line-height:1.1;padding:1mm;max-height:8mm;background:#f2f2f2}
   .rc{padding:8px 10px;margin:0 0 8px}
+  .rc.keep{break-inside:avoid;page-break-inside:avoid}
   .testdesc{background:#f7f7f7;border-color:#888;font-size:8.5px;padding:6px 8px;margin:4px 0 8px;break-inside:avoid;page-break-inside:avoid}
   .pdfpages img{max-height:245mm}
 }
@@ -248,7 +249,7 @@ iframe{display:block;width:100%;border:0;background:transparent}
       <button type="button" data-modo="manual" aria-pressed="true">Manual</button>
       <button type="button" data-modo="auto" aria-pressed="false">Automático (fotos guiadas)</button>
     </div>
-    <div id="ver">v5.2.1 · 2026-11-06</div>
+    <div id="ver">v5.2.2 · 2026-11-06</div>
   </div>
   <div id="view">
     <div id="frames">
@@ -363,7 +364,7 @@ var TRS={
 };
 var tipo="3",sel=["H","T"],repMode=false,frames={},panes={};
 var MODO="manual";try{if(LS.getItem("unif_modo")==="auto")MODO="auto";}catch(e){}
-var APP_VERSION={v:"5.2.1",fecha:"2026-11-06"};
+var APP_VERSION={v:"5.2.2",fecha:"2026-11-06"};
 function newId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 var EMP={nom:"",nit:"",dir:"",tel:"",logo:""};
 function $(id){return document.getElementById(id);}
@@ -701,7 +702,7 @@ function buildReport(){
   secs.forEach(function(s){
     var D=getDatos(s.k),tb=D?tablesHtml(D):"";
     if(s.k==="O"&&tb&&!Object.keys(getPdfs("O")).length)tb='<div class="oillegend">Resultados en amarillo · referencias fijas</div>'+tb;
-    h+='<div class="rc"><h3><span>'+esc(s.t)+'</span><span class="bd '+s.cls+'">'+esc(s.label)+"</span></h3><div class='norma'>"+esc(NORMAS[s.k])+"</div>"+(TEST_DESC[s.k]?'<div class="testdesc">'+TEST_DESC[s.k]+'</div>':'')+(tb||"<pre>"+esc(s.body||"Sin datos.")+"</pre>");
+    h+='<div class="rc'+(s.k==="D"?" keep":"")+'"><h3><span>'+esc(s.t)+'</span><span class="bd '+s.cls+'">'+esc(s.label)+"</span></h3><div class='norma'>"+esc(NORMAS[s.k])+"</div>"+(TEST_DESC[s.k]?'<div class="testdesc">'+TEST_DESC[s.k]+'</div>':'')+(tb||"<pre>"+esc(s.body||"Sin datos.")+"</pre>");
     if(s.k==="O"){
       var PP=getPdfs("O");
       ["AFQ","PCB"].forEach(function(a){

@@ -1,5 +1,10 @@
 # Cambios
 
+## v5.2.2 — 2026-11-06
+
+- **La prueba de Resistencia de devanados no se parte entre hojas:** si no cabe completa en el espacio que queda, baja entera a la hoja siguiente (tablas AT y BT, fotos y descripción juntas). Se aplica siempre, no solo a un informe concreto.
+- Caché `transformadores-pwa-v5.2.2-2026-11-06` y versión visible 5.2.2.
+
 ## v5.2.1 — 2026-11-06
 
 - **Las tablas de las pruebas ya no saltan completas a la hoja siguiente:** usan el espacio disponible y continúan en la hoja siguiente, repitiendo el encabezado de columnas. Las filas no se cortan y las fotos siguen agrupadas sin partirse.
